@@ -1,0 +1,539 @@
+html,body{
+    height: 100%;
+}
+body{
+    padding: 0;
+}
+.ace-box {
+    width: 100%;
+    float: left;
+    height: 100%;
+    position: relative;
+    border: 1px solid #ddd;
+}
+.ace-editor-cus{
+    height: 100%!important;
+    width: 100%;
+    padding: 0 15px;
+    position: relative;
+    z-index: 2;
+}
+#aceEditorContain{
+    height: 50%;
+    width: 100%;
+    padding: 0 15px;
+    margin-left: 0px;
+}
+header{
+    position: absolute;
+    right: 15px;
+    top: 5px;
+    padding: 10px 15px 0 15px;
+    text-align: center;
+    z-index: 3;
+}
+header .logo{
+    float: left;
+}
+header .logo img{
+    height: 32px;
+}
+header .features{
+    /*float: right;*/
+}
+header .features .features-import{
+    display: inline-block;
+    margin-right: 4px;
+    text-align: left;
+}
+header .features .features-btns{
+    display: inline-block;
+}header .features .features-btns span{
+    margin-left: 4px;
+ }
+header .features .features-btns .input-group{
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 25px;
+}
+header .features .features-btns .input-group:after{
+    content: '';
+    clear: both;
+    display: block;
+}
+header .features .features-btns .input-group .input-group-addon{
+    width: 50px;
+    float: left;
+    padding: 8.5px;
+}
+header .features .features-btns .input-group .input-group-btn{
+    display: inline-block;
+    vertical-align: middle;
+    width: auto;
+}
+header .features .features-btns .input-group select{
+    width: 68px;
+    float: left;
+}
+
+header .features-import select,header .features-import input{
+    display: inline-block;
+    max-width: 180px;
+}
+header .features-import .chosen-container{
+    height: 32px;
+    width: 180px!important;
+}
+header .features-import input{
+    width: 150px;
+ }
+header .chosen-container-single .chosen-single{
+    height: 32px!important;
+    line-height: 30px!important;
+}
+.ace-header{
+    margin: 15px 15px 0 15px;
+    position: relative;
+    z-index: 9;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-bottom: none;
+}
+.ace-header:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+.ace-header .ace-operating{
+    float: right;
+}
+.ace-header .ace-operating i{
+    padding: 10px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    position: relative;
+}
+.ace-header .ace-operating i input{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.ace-header .ace-operating i:hover{
+    background-color: #f8f8f8;
+}
+.ace-header .ace-tabs{
+    float: left;
+}
+.ace-header .ace-tabs ul{
+    margin-bottom: 0;
+    margin-left: 0px;
+    padding-left: 48px;
+    display: inline-block;
+    vertical-align: middle;
+    min-height: 35px;
+}
+.ace-header .ace-tabs .icon-plus-sign-alt{
+    display: inline-block;
+    padding: 10px 13px 10px 15px;
+    vertical-align: middle;
+    color: #337ab7;
+    cursor: pointer;
+}
+.ace-header .ace-tabs .icon-plus-sign-alt:hover{
+    background-color: #f5f5f5;
+}
+.ace-header .ace-tabs li{
+    padding: 6.5px 15px;
+    display: inline-block;
+    cursor: pointer;
+    border: 1px solid #f5f5f5;
+    font-weight: bold;
+    color: #337ab7;
+    min-height: 35px;
+}
+.ace-header .ace-tabs li i{
+    padding: 10px 0 10px 10px;
+}
+.ace-header .ace-tabs li:hover{
+    background-color: #f5f5f5;
+    border-color: #f5f5f5;
+}
+.ace-header .ace-tabs li.active{
+    border: 1px solid #ddd;
+    border-bottom-color: #fff;
+    position: relative;
+    cursor: auto;
+    color: #333;
+    background-color: #fff;
+}
+.ace-header .ace-tabs li.active:hover{
+    background-color: #fff;
+}
+.ace-header .ace-tabs li.active:after{
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    height: 1px;
+    width: 100%;
+    background-color: #fff;
+}
+
+.put-box{
+    width: 100%;
+    height: calc(50% - 168px);
+    padding: 0 15px;
+    position: relative;
+}
+.put-box:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+.put-box .input-box,.put-box .output-box{
+     width: 40%;
+     float: left;
+    height: 100%;
+ }
+.put-box .input-box .put-header-r i{
+    position: relative;
+    overflow: hidden;
+}
+.put-box .input-box .put-header-r input[type=file]{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+.put-box .output-box{
+    width: 60%;
+}
+.put-box .input-box .input-header{
+    border-right: 1px solid #ddd;
+}
+.put-box .input-box .input-header,.put-box .output-box .output-header{
+    padding: 10px;
+}
+.put-box .input-box .input-header:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+.put-box .output-box .output-header:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+.put-header-l{
+    float: left;
+    font-size: 18px;
+    font-weight: bold;
+}
+.put-header-l span{
+    padding-left: 15px;
+    font-size: 14px;
+    color: #999;
+}
+.put-header-l i{
+    font-size: 18px;
+    margin-right: 5px;
+}
+.put-header-r{
+    float: right;
+}
+.put-header-r span{
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+.put-header-r .output-status{
+    font-weight: bold;
+    color: #00A000;
+}
+.put-header-r .output-speed{
+    font-size: 12px;
+    color: #999;
+}
+.put-header-r i{
+    font-size: 18px;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 5px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.put-header-r i:hover{
+    background-color: #f5f5f5;
+}
+
+.put-box .input-ace,.put-box .output-ace{
+    border: 1px solid #ddd;
+    height: calc(100% - 50px);
+}
+.put-box .output-ace{
+    border-left: none;
+}
+.run-footer{
+    height: 50px;
+    background-color: #23384e;
+    margin-top: 15px;
+    text-align: center;
+}
+.run-footer a{
+    display: inline-block;
+    color: #9fa3a9;
+    font-size: 14px;
+    padding: 15px;
+    text-decoration: none;
+}
+.run-footer a:hover{
+    color: #fff;
+    text-decoration: none;
+}
+
+#keybordModal .modal-dialog{
+    width: 350px;
+    position: absolute;
+    margin: 0;
+    right: 0;
+    top: 0;
+    height: 100%;
+    border: none;
+}
+#keybordModal .modal-content{
+    height: 100%;
+    overflow: hidden;
+}
+#keybordModal .modal-body{
+    height: calc(100% - 52px);
+    overflow-y: auto!important;
+}
+#keybordModal .ace_optionsMenuCommand{
+    color: #666;
+}
+#keybordModal .ace_optionsMenuKey{
+    color: #0d3d88;
+    font-weight: bold;
+}
+#keybordModal .ace_optionsMenuEntry{
+    padding-bottom: 5px;
+}
+
+#moreSettingModal .modal-dialog{
+    width: 350px;
+    position: absolute;
+    margin: 0;
+    right: 0;
+    top: 0;
+    height: 100%;
+    border: none;
+}
+#moreSettingModal .modal-content{
+    height: 100%;
+    overflow: hidden;
+}
+#moreSettingModal .modal-body{
+    height: calc(100% - 52px);
+    overflow-y: auto!important;
+}
+#moreSettingModal .ace_optionsMenuCommand{
+    color: #666;
+}
+#moreSettingModal .ace_optionsMenuKey{
+    color: #0d3d88;
+    font-weight: bold;
+}
+#moreSettingModal .ace_optionsMenuEntry{
+    padding-bottom: 5px;
+}
+#moreSettingModal .modal-body>div{
+    margin-bottom: 15px;
+}
+
+#settingModal .switch-box:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+#settingModal .switch-box .switch-item{
+    float: left;
+    width: 130.7px;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    margin-right: 15px;
+}
+#settingModal .switch-box .switch-item:last-child{
+    margin-right: 0;
+}
+
+#settingModal .modal-form .switch-item{
+    padding: 7.5px 21px;
+    border: 1px solid #ddd;
+    float: left;
+}
+#settingModal .modal-form .input-group-cus{
+    margin-bottom: 15px;
+}
+#settingModal .modal-form .input-group-cus:after{
+    display: block;
+    content: '';
+    clear: both;
+}
+#settingModal .modal-form .input-group-cus .input-group-addon{
+    float: left;
+    padding: 16px 6px;
+    width: 50px;
+}
+#settingModal .modal-form .input-group-cus input{
+    float: left;
+    width: 60px;
+    height: 47px;
+}
+#settingModal .modal-form .input-group-cus .number-box .input-group-addon{
+    margin-left: 15px;
+}
+#settingModal .modal-form .input-group-cus label{
+    height: 30px;
+}
+#settingModal .modal-form .input-group{
+    margin-bottom: 15px;
+}
+#settingModal .modal-form .input-group select{
+    width: 225px;
+}
+#settingModal .modal-form .input-group input{
+    width: 225px;
+}
+.number-input{
+    position: relative;
+    width: 20px;
+    margin-left: 2px;
+    float: left;
+}
+.number-input .number-add{
+    width: 20px;
+    position: relative;
+    height: 50%;
+    padding: 0;
+    text-align: center;
+}
+.number-input .number-delete{
+    width: 20px;
+    position: relative;
+    height: 50%;
+    padding: 0;
+    text-align: center;
+}
+.number-input .number-add i,.number-input .number-delete i{
+    font-size: 10px;
+}
+.custom-displaynone{
+    position: absolute!important;
+    left: -10000px!important;
+    top: 0;
+}
+#aceEditor{
+    transition: none;
+    -webkit-transition: none;
+    -o-transition: none;
+    -ms-transition: none;
+    background-color: #fff;
+    margin-top: 0;
+}
+.output-fullscreen{
+    width: 100%!important;
+
+}
+.output-fullscreen .output-ace{
+    border-left: 1px solid #ddd!important;
+}
+.run-hidden{
+    width: 0;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 0;
+    overflow: hidden;
+}
+.xf-window{
+    z-index: 9;
+    display: none;
+}
+
+.container .ace-header{
+    margin: 0;
+}
+.container #aceEditorContain{
+    padding: 0;
+}
+.container .put-box{
+    padding: 0;
+    height: 200px;
+}
+.container .put-box .output-box{
+    width: 100%;
+
+}
+.container .put-box .output-ace{
+    border: 1px solid #ddd;
+}
+.container .put-box .input-ace{
+    height: calc(100% - 40px);
+    margin-top: 38px;
+}
+.container .put-box .input-box .input-header{
+    border: none;
+}
+.container .put-box .input-box{
+    width: 100%;
+}
+.container .put-box .input-box .input-header{
+    width: auto;
+    float: left;
+    padding: 0;
+}
+.container .put-box-input{
+    height: 100%;
+    width: 183px;
+    float: right;
+}
+.container #putBoxOutput{
+
+}
+#containerHalfScreen{
+    height: calc(100% - 314px);
+    margin-top: 15px;
+}
+.container #aceEditorContain{
+    height: calc(100% - 38px);
+}
+.widthandmaxwidth-100{
+    width: 980%!important;
+    max-width: 98%!important;
+}
+.container .ace-max-box{
+    height: 100%;
+    width: calc(100% - 195px);
+    float: left;
+}
+.aceandput-box{
+    height: calc(100% - 200px);
+}
+.container header{
+    padding-right: 0;
+}
+
+.html-footer2{
+    position: relative!important;
+}

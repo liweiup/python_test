@@ -1,0 +1,30 @@
+在 Linux 和 MacOS 中创建环境
+对于 Python 3：
+要为 Python 3 创建虚拟环境，请使用venv模块并为其命名：
+
+python3 -m venv <name of environment>
+
+在 Windows 中创建环境
+对于 Python 3：
+使用以下命令在 Python 3 中创建并命名虚拟环境：
+
+py -3 -m venv <name of environment>
+
+在 Linux 和 MacOS 上激活环境
+使用以下命令激活 Linux 和 MacOS 中的虚拟环境：
+
+. <name of environment>/bin/activate
+
+在 Windows 上激活环境
+对于 Windows，使用以下命令激活虚拟环境：
+
+<name of environment>\Scripts\activate
+
+安装 Flask
+使用以下命令在激活的环境中安装 Flask pip：
+
+pip install Flask
+
+运行 Flask 应用程序：
+
+flask run
