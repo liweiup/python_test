@@ -29,6 +29,6 @@ class RedisSub(threading.Thread):
                 except TimeoutError as err:
                     app.logger.info(err)
                     time.sleep(2)
-                except:
-                    time.sleep(2)
-                    app.logger.info("reids connect error")
+                # except:
+                #     time.sleep(2)
+                #     app.logger.info("reids connect error")
