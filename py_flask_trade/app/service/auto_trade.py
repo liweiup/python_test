@@ -59,7 +59,8 @@ class AutoTrade:
                         if self.bs_type == 'diff_buy':
                             price = stock_row['buy_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
-                            msg = self.trade_user.market_buy(individual_code,amount=bs_num)
+                            # msg = self.trade_user.market_buy(individual_code,amount=bs_num)
+                            msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
                             app.logger.info(msg)
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
