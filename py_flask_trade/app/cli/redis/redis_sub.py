@@ -10,8 +10,8 @@ class RedisSub(threading.Thread):
         threading.Thread.__init__(self)
         self.chan_sub = chan_sub
     def run(self):
-            obj = RedisHelper()
             while True:
+                obj = RedisHelper()
                 try:
                     redis_sub = obj.subscribe(self.chan_sub)
                     if redis_sub != None:
