@@ -28,7 +28,7 @@ def register_redis(app):
     from app.cli.redis.client import redis_client
     from app.cli.redis.redis_sub import RedisSub
     try:
-        redis_client.init_app(app)
+        redis_client.init_app(app,health_check_interval = 30)
         redisSub = RedisSub(set(str.split(app.config.get("REDIS_SUB"),",")))
         redisSub.start()
     except:
