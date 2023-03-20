@@ -18,17 +18,19 @@ class RedisSub(threading.Thread):
                         message = redis_sub.get_message()
                         if message:
                             if message["type"] == "message":
-                                app.logger.info(str(message["channel"], encoding="utf-8") + ":" + str(message["data"], encoding="utf-8"))
-                                autoTrade = AutoTrade(str(message["channel"], encoding="utf-8"),str(message["data"], encoding="utf-8"))
+                                channel = str(message["channel"], encoding="utf-8")
+                                data = str(message["data"], encoding="utf-8")
+                                app.logger.info(channel + ":" + data)
+                                autoTrade = AutoTrade(channel,data)
                                 autoTrade.auto_trade()
                             elif message["type"] == "subscrube":
                                 app.logger.info(str(message["chennel"], encoding="utf-8"))
-                            time.sleep(0.3)  # be nice to the system :)
+                            time.sleep(0.1)  # be nice to the system :)
                 except json.decoder.JSONDecodeError as err:
                     app.logger.info(err)
                 except TimeoutError as err:
                     app.logger.info(err)
-                    time.sleep(2)
+                    time.sleep(1)
                 # except:
                 #     time.sleep(2)
                 #     app.logger.info("reids connect error")
