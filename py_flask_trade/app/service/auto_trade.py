@@ -82,12 +82,12 @@ class AutoTrade:
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
                             msg = self.trade_user.market_buy(individual_code,amount=bs_num)
                             # msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
-                            app.logger.info(msg)
+                            app.logger.info("买入-股票:{individual_code},数量:{in_num},结果:{msg}".format(individual_code=individual_code, in_num=in_num, msg=msg))
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
                             msg = self.trade_user.market_sell(individual_code,amount=bs_num)
-                            app.logger.info(msg)
+                            app.logger.info("卖出-股票:{individual_code},数量:{in_num},结果:{msg}".format(individual_code=individual_code, in_num=in_num, msg=msg))
                     except easytrader.exceptions.TradeError as err:
                         app.logger.info("自动交易失败:{0}".format(err))
                         redis_client.rpush(self.bs_key,self.stock_json_str)
