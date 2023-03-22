@@ -14,6 +14,7 @@ class AutoTrade:
     thx_path = r'D:\同花顺软件\同花顺\xiadan.exe'
     bs_type = ""
     bs_key = ""
+    trynum = 1
     stock_json = None
     hwnd_map = {}#所有窗口
     def __init__(self, bs_type):
@@ -21,23 +22,21 @@ class AutoTrade:
         if bs_type == 'diff_buy':
             self.bs_key = commonkey.BUYSTOCKINFO
         elif bs_type == 'diff_sell':
-            self.bs_key = commonkey.BUYSTOCKINFO
+            self.bs_key = commonkey.SELLSTOCKINFO
         llen = redis_client.llen(self.bs_key)
         if llen > 0:
-            trynum = 0
             while True:
-                if trynum > 20:
+                if self.trynum >= 10:
                     app.logger.info("交易程序出错")
+                    self.stock_json_str = redis_client.lpop(self.bs_key)
                     break
                 llen = redis_client.llen(self.bs_key)
                 if llen == 0:
                     break
                 self.stock_json_str = redis_client.lpop(self.bs_key)
-                print(self.stock_json)
                 self.bs_type = bs_type
                 self.auto_trade()
                 time.sleep(2)
-                trynum = trynum + 1
     def get_all_hwnd(self,hwnd, mouse):
         if (win32gui.IsWindow(hwnd) and
             win32gui.IsWindowEnabled(hwnd) and
@@ -92,25 +91,27 @@ class AutoTrade:
                     except easytrader.exceptions.TradeError as err:
                         app.logger.info("自动交易失败:{0}".format(err))
                         redis_client.rpush(self.bs_key,self.stock_json_str)
+                        self.trynum = self.trynum + 1
                     # print(user.balance)
                     # print(user.position)
                     # msg = user.buy(individual_code, price=price, amount=bs_num)
         except pywinauto.application.ProcessNotFoundError as err:
             app.logger.info("检查同花顺客户端是否打开:{0}".format(err))
             redis_client.rpush(self.bs_key,self.stock_json_str)
+            self.trynum = self.trynum + 1
         except pywinauto.timings.TimeoutError:
             app.logger.info("自动交易失败，pywinauto超时")
             redis_client.rpush(self.bs_key,self.stock_json_str)
+            self.trynum = self.trynum + 1
         except:
             app.logger.info("自动交易失败，未知错误")
             redis_client.rpush(self.bs_key,self.stock_json_str)
+            self.trynum = self.trynum + 1
 
 if __name__ == "__main__":
-    str = '[{"individual_code":"605162","individual_name":"新中港","stype":1,"rank_num":3700,"stock_buy_num":565,"now_price":0,"buy_price":9.53,"today_ratio":3.813,"clean_ratio":0,"c_date":"2023-03-06","c_hour":9,"c_min":40,"strategy_type":2}]'
-    autoTrade = AutoTrade('diff_buy',str)
+    autoTrade = AutoTrade('diff_buy')
     autoTrade.auto_trade()
 
-    str = '[{"individual_code":"605001","individual_name":"威奥股份","stype":1,"rank_num":2987,"stock_buy_num":625,"now_price":7.88,"buy_price":8.01,"today_ratio":0.25,"clean_ratio":-1.6230000000000002,"c_date":"2023-03-03","c_hour":9,"c_min":40,"strategy_type":2}]'
-    autoTrade = AutoTrade('diff_sell',str)
+    autoTrade = AutoTrade('diff_sell')
     autoTrade.auto_trade()
     exit
