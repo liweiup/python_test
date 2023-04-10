@@ -15,6 +15,7 @@ class AutoTrade:
     bs_type = ""
     bs_key = ""
     trynum = 1
+    
     stock_json = None
     hwnd_map = {}#所有窗口
     def __init__(self, bs_type):
