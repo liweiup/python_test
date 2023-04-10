@@ -20,8 +20,8 @@ class RedisSub(threading.Thread):
                                 channel = str(message["channel"], encoding="utf-8")
                                 data = str(message["data"], encoding="utf-8")
                                 app.logger.info(channel + ":" + data)
-                                from app.service.auto_trade import AutoTrade
-                                AutoTrade(channel)
+                                # from app.service.auto_trade import AutoTrade
+                                # AutoTrade(channel)
                             elif message["type"] == "subscrube":
                                 app.logger.info(str(message["chennel"], encoding="utf-8"))
                 except json.decoder.JSONDecodeError as err:
