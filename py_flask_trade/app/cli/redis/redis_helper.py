@@ -31,7 +31,11 @@ class RedisHelper(object):
                 self._pub.subscribe(chan_sub)
         except redis.ConnectionError as err:
             time.sleep(3)
-            print("redis connect error:" + str(ping_flag))
+            print("redis.ConnectionError:" + str(ping_flag))
+            self._pub = None
+        except redis.exceptions.ConnectionError as err:
+            time.sleep(3)
+            print("redis.exceptions.ConnectionError" + str(ping_flag))
             self._pub = None
         finally:
             return self._pub
