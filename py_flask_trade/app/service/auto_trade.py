@@ -25,10 +25,16 @@ class AutoTrade:
             self.bs_key = commonkey.SELLSTOCKINFO
         llen = redis_client.llen(self.bs_key)
         if llen > 0:
-            self.trade_user = easytrader.use('universal_client')
-            self.trade_user.connect(self.thx_path)
-            self.trade_user.enable_type_keys_for_editor()
-            self.set_cmd_top()
+            try:
+                self.trade_user = easytrader.use('universal_client')
+                self.trade_user.connect(self.thx_path)
+                self.trade_user.enable_type_keys_for_editor()
+                self.set_cmd_top()
+            except:
+                app.logger.info("自动交易失败，客户端连接错误")
+                return
+            redis_client.rpush(self.bs_key,self.stock_json_str)
+            self.trynum = self.trynum + 1
             while True:
                 if self.trynum >= 9:
                     app.logger.info("交易程序出错,重试次数:{num}".format(num=self.trynum))
