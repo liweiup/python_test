@@ -24,7 +24,6 @@ class RedisSub(threading.Thread):
                                 AutoTrade(channel)
                             elif message["type"] == "subscrube":
                                 app.logger.info(str(message["chennel"], encoding="utf-8"))
-                            time.sleep(1)  # be nice to the system :)
                 except json.decoder.JSONDecodeError as err:
                     app.logger.info(err)
                 except TimeoutError as err:

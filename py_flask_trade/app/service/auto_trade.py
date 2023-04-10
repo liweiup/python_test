@@ -25,9 +25,13 @@ class AutoTrade:
             self.bs_key = commonkey.SELLSTOCKINFO
         llen = redis_client.llen(self.bs_key)
         if llen > 0:
+            self.trade_user = easytrader.use('universal_client')
+            self.trade_user.connect(self.thx_path)
+            self.trade_user.enable_type_keys_for_editor()
+            self.set_cmd_top()
             while True:
-                if self.trynum >= 10:
-                    app.logger.info("交易程序出错")
+                if self.trynum >= 9:
+                    app.logger.info("交易程序出错,重试次数:{num}".format(num=self.trynum))
                     self.stock_json_str = redis_client.lpop(self.bs_key)
                     break
                 llen = redis_client.llen(self.bs_key)
@@ -36,7 +40,7 @@ class AutoTrade:
                 self.stock_json_str = redis_client.lpop(self.bs_key)
                 self.bs_type = bs_type
                 self.auto_trade()
-                time.sleep(2)
+                # time.sleep(2)
     def get_all_hwnd(self,hwnd, mouse):
         if (win32gui.IsWindow(hwnd) and
             win32gui.IsWindowEnabled(hwnd) and
@@ -59,10 +63,6 @@ class AutoTrade:
 
     def auto_trade(self):
         try:
-            self.trade_user = easytrader.use('universal_client')
-            self.trade_user.connect(self.thx_path)
-            self.trade_user.enable_type_keys_for_editor()
-            self.set_cmd_top()
             stock_json = json.loads(self.stock_json_str)
             if len(stock_json) > 0:
                 for stock_row in stock_json:
