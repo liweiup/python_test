@@ -14,6 +14,7 @@ class AutoTrade:
     thx_path = r'D:\同花顺软件\同花顺\xiadan.exe'
     bs_type = ""
     bs_key = ""
+    stock_json_str = ""
     trynum = 1
     
     stock_json = None
@@ -34,8 +35,6 @@ class AutoTrade:
             except:
                 app.logger.info("自动交易失败，客户端连接错误")
                 return
-            redis_client.rpush(self.bs_key,self.stock_json_str)
-            self.trynum = self.trynum + 1
             while True:
                 if self.trynum >= 9:
                     app.logger.info("交易程序出错,重试次数:{num}".format(num=self.trynum))
