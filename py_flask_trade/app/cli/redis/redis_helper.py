@@ -29,13 +29,13 @@ class RedisHelper(object):
                 self._pub = self._conn.pubsub()
                 # 订阅某个频道，与publish()中指定的频道一样。消息会发布到这个频道中
                 self._pub.subscribe(chan_sub)
-        except redis.ConnectionError as err:
-            time.sleep(3)
-            print("redis.ConnectionError:" + str(ping_flag))
-            self._pub = None
         except redis.exceptions.ConnectionError as err:
             time.sleep(3)
             print("redis.exceptions.ConnectionError" + str(ping_flag))
+            self._pub = None
+        except redis.ConnectionError as err:
+            time.sleep(3)
+            print("redis.ConnectionError:" + str(ping_flag))
             self._pub = None
         finally:
             return self._pub
