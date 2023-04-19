@@ -89,7 +89,7 @@ class AutoTrade:
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
                             # msg = self.trade_user.market_buy(individual_code,amount=bs_num)
                             msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
-                            app.logger.info("买入-股票:{individual_code},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, bs_num=bs_num, msg=msg))
+                            app.logger.info("买入-股票:{individual_code},价格:{price},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, price=price,bs_num=bs_num, msg=msg))
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
