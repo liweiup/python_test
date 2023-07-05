@@ -85,7 +85,7 @@ class AutoTrade:
                         # 买入还是卖出
                         if self.bs_type == 'diff_buy':
                             price = stock_row['buy_price']
-                            price = price + 0.01
+                            price = price + 0.05
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
                             msg = self.trade_user.market_buy(individual_code,amount=bs_num)
                             # msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
