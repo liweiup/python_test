@@ -16,7 +16,7 @@ class AutoTrade:
     bs_key = ""
     stock_json_str = ""
     trynum = 1
-    
+
     stock_json = None
     hwnd_map = {}#所有窗口
     def __init__(self, bs_type):
@@ -47,11 +47,11 @@ class AutoTrade:
                 self.bs_type = bs_type
                 self.auto_trade()
                 # time.sleep(2)
+
     def get_all_hwnd(self,hwnd, mouse):
-        if (win32gui.IsWindow(hwnd) and
-            win32gui.IsWindowEnabled(hwnd) and
-            win32gui.IsWindowVisible(hwnd)):
+        if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
             self.hwnd_map.update({hwnd: win32gui.GetWindowText(hwnd)})
+
     # cmd窗口置顶
     def set_cmd_top(self):
         win32gui.EnumWindows(self.get_all_hwnd, 0)
@@ -128,4 +128,3 @@ if __name__ == "__main__":
 
     autoTrade = AutoTrade('diff_sell')
     autoTrade.auto_trade()
-    exit
