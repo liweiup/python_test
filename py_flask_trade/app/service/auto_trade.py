@@ -84,11 +84,18 @@ class AutoTrade:
                     try:
                         # 买入还是卖出
                         if self.bs_type == 'diff_buy':
-                            price = stock_row['buy_price']
-                            price = price + 0.05
+                            buy_price = stock_row['buy_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
-                            msg = self.trade_user.market_buy(individual_code,amount=bs_num)
-                            # msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
+                            if stock_row['deal_type'] == 0:
+                                newet_price = stock_row['newet_price']
+                                if newet_price != 0 and newet_price < buy_price:
+                                    price = newet_price + 0.05
+                                else:
+                                    price = buy_price + 0.05
+                                msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
+                            else:
+                                price = buy_price + 0.05
+                                msg = self.trade_user.market_buy(individual_code,amount=bs_num)
                             app.logger.info("买入-股票:{individual_code},价格:{price},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, price=price,bs_num=bs_num, msg=msg))
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
