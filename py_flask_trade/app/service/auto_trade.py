@@ -92,6 +92,7 @@ class AutoTrade:
                                     price = newet_price + 0.05
                                 else:
                                     price = buy_price + 0.05
+                                price = '{:.2f}'.format(price)
                                 msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
                             else:
                                 price = buy_price + 0.05
