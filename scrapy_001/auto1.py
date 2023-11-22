@@ -1,19 +1,73 @@
-import pyautogui
-
-screenWidth, screenHeight = pyautogui.size()
-currentMouseX, currentMouseY = pyautogui.position()
-# pyautogui.moveTo(100, 150)
-# pyautogui.click()
-#  鼠标向下移动10像素
-pyautogui.moveRel(0, 10)
-pyautogui.doubleClick()
-#  用缓动/渐变函数让鼠标2秒后移动到(500,500)位置Hello world！
-#  use tweening/easing function to move mouse over 2 seconds.
-pyautogui.moveTo(600, 300, duration=2, tween=pyautogui.easeInOutQuad)
-#  在每次输入之间暂停0.25秒
-pyautogui.typewrite('Hello world!', interval=0.25)
-pyautogui.press('esc')
-pyautogui.keyDown('shift')
-pyautogui.press(['left', 'left', 'left', 'left', 'left', 'left'])
-pyautogui.keyUp('shift')
-pyautogui.hotkey('ctrl', 'c')
+import json  
+from collections import defaultdict  
+  
+# 输入的JSON字符串  
+json_string = '''  
+{  
+    "_id": "rowId_2",  
+    "recorddate": "2023-11-22 00:00:00",  
+    "lineno": 10,  
+    "recncStatus": "not_reconciled",  
+    "discountTaxType": "0",  
+    "priceMark": 0,  
+    "totalBillOriSum": 0,  
+    "totalBillNatSum": 0,  
+    "billSubQty": 0,  
+    "billqty": 0,  
+    "reverseInvoiceQty": 0,  
+    "sqty": 0,  
+    "checkingSettlementQty": 0,  
+    "deductMessQty": 0,  
+    "totalReturnQty": 0,  
+    "smoney": 0,  
+    "sfee": 0,  
+    "aggregated": false,  
+    "expenseOriSum": 0,  
+    "expenseOriMoney": 0,  
+    "expenseNatSum": 0,  
+    "expenseNatMoney": 0,  
+    "_colErrorField": "productsku_cCode",  
+    "_status": "Insert",  
+    "oriTaxUnitPrice": null,  
+    "qty": null,  
+    "priceQty": null,  
+    "invPriceExchRate": 1,  
+    "taxRate": 0,  
+    "oriUnitPrice": null,  
+    "oriTax": null,  
+    "oriMoney": null,  
+    "oriSum": null,  
+    "natUnitPrice": null,  
+    "natTaxUnitPrice": null,  
+    "natTax": null,  
+    "natMoney": null,  
+    "natSum": null,  
+    "subQty": null,  
+    "invExchRate": 1,  
+    "unDeductTax": null,  
+    "oriUnDeductTax": null,  
+    "costMoney": null,  
+    "costUnitPrice": null,  
+    "oriCostUnitPrice": null,  
+    "oriCostMoney": null,  
+    "sourceGrandchildrenId": null,  
+    "firstsourceGrandchildrenId": null,  
+    "sourceOrderlineno": null,  
+    "firstgrandlineno": null,  
+    "uplineno": null,  
+    "makeproduct": null,  
+    "priceUOM_Precision": 2,  
+    "stockUnitId_Precision": 2,  
+    "contactsQuantity": null,  
+    "contactsPieces": null,  
+    "budgetUnitPrice": null,  
+    "budgetMoney": null,  
+    "warehouseMaterialCheckRule": "1",  
+    "propertiesValue": null,  
+    "rowno": 1  
+}  
+'''  
+# 将JSON字符串转换为Python字典对象  
+data = json.loads(json_string)  
+print(data)
+# 使用defaultdict来存储以值类型为键的字典对象，值为原字典的值的数量（如果有多个相同值）或该值的类型（如果该值为null）加上该值的名称（如果该值为null）或该值的值（如果该值不是null）加上该值的名称（如果该值不是null））））））））））））））））                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   result = defaultdict(lambda: defaultdict(str)) # 使用defaultdict来存储以值类型为键的字典对象，值为原字典的值的数量（如果有多个相同值）或该值的类型（如果该值为null）加上该值的名称（如果该值为null）或该值的值（如果该值不是null）加上该值的名称（如果该值不是null）")result = defaultdict(lambda: defaultdict(str)) # 使用defaultdict来存储以值类型为键的字典对象，值为原字典的值的数量（如果有多个相同值）或该值的类型（如果该值为null）加上该值的名称（如果该值为null）或该值的值（如果该值不是null）加上该值的名称（如果该值不是null）")result = defaultdict(lambda: defaultdict(str)) # 使用defaultdict来存储以值类型为键的字典对象，值为原字典的
