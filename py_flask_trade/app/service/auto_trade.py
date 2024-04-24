@@ -48,7 +48,7 @@ class AutoTrade:
                 self.auto_trade()
                 # time.sleep(2)
 
-    def get_all_hwnd(self,hwnd, mouse):
+    def get_all_hwnd(self,hwnd, mouse): 
         if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
             self.hwnd_map.update({hwnd: win32gui.GetWindowText(hwnd)})
 
@@ -101,7 +101,12 @@ class AutoTrade:
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
-                            msg = self.trade_user.market_sell(individual_code,amount=bs_num)
+                            if stock_row['deal_type'] == 0:
+                                price = price - 0.05
+                                price = '{:.2f}'.format(price)
+                                msg= self.trade_user.sell(individual_code,price=price, amount=bs_num)
+                            else:
+                                msg = self.trade_user.market_sell(individual_code,amount=bs_num)
                             app.logger.info("卖出-股票:{individual_code},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, bs_num=bs_num, msg=msg))
                     except easytrader.exceptions.TradeError as err:
                         app.logger.info("自动交易失败:{0}".format(err))
