@@ -14,6 +14,7 @@ class AutoTrade:
     thx_path = r'D:\同花顺软件\同花顺\xiadan.exe'
     bs_type = ""
     bs_key = ""
+    recall_key = ""
     stock_json_str = ""
     trynum = 1
 
@@ -25,6 +26,7 @@ class AutoTrade:
             self.bs_key = commonkey.BUYSTOCKINFO
         elif bs_type == 'diff_sell':
             self.bs_key = commonkey.SELLSTOCKINFO
+        self.recall_key = "BK:RECALL:INFO"
         llen = redis_client.llen(self.bs_key)
         if llen > 0:
             try:
@@ -97,17 +99,32 @@ class AutoTrade:
                             else:
                                 price = buy_price + 0.05
                                 msg = self.trade_user.market_buy(individual_code,amount=bs_num)
-                            app.logger.info("买入-股票:{individual_code},价格:{price},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, price=price,bs_num=bs_num, msg=msg))
+                            entrust_no = ""
+                            if 'entrust_no' in msg:
+                                entrust_no = msg.get('entrust_no')
+                                redis_client.rpush(self.recall_key,entrust_no)
+                            app.logger.info("买入-股票:{individual_code},价格:{price},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, price=price,bs_num=bs_num, msg=msg,entrust_no=entrust_no))
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
                             if stock_row['deal_type'] == 0:
-                                price = price - 0.05
+                                price = price - 0.02
                                 price = '{:.2f}'.format(price)
                                 msg= self.trade_user.sell(individual_code,price=price, amount=bs_num)
                             else:
                                 msg = self.trade_user.market_sell(individual_code,amount=bs_num)
-                            app.logger.info("卖出-股票:{individual_code},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, bs_num=bs_num, msg=msg))
+                            entrust_no = ""
+                            if 'entrust_no' in msg:
+                                entrust_no = msg.get('entrust_no')
+                                redis_client.rpush(self.recall_key,entrust_no)
+                            app.logger.info("卖出-股票:{individual_code},数量:{bs_num},结果:{msg},entrust_no:{entrust_no}".format(individual_code=individual_code, bs_num=bs_num, msg=msg,entrust_no=entrust_no))
+                        elif self.bs_type == 'diff_search':
+                            # 当日成交
+                            self.trade_user.today_trades
+                            # 当日委托
+                            self.trade_user.today_entrusts
+                            msg = ""
+                            # app.logger.info("查询挂单信息-股票:{individual_code},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, bs_num=bs_num, msg=msg))
                     except easytrader.exceptions.TradeError as err:
                         app.logger.info("自动交易失败:{0}".format(err))
                         redis_client.rpush(self.bs_key,self.stock_json_str)
