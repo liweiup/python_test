@@ -14,7 +14,6 @@ class AutoTrade:
     thx_path = r'D:\同花顺软件\同花顺\xiadan.exe'
     bs_type = ""
     bs_key = ""
-    recall_key = ""
     stock_json_str = ""
     trynum = 1
 
@@ -26,34 +25,39 @@ class AutoTrade:
             self.bs_key = commonkey.BUYSTOCKINFO
         elif bs_type == 'diff_sell':
             self.bs_key = commonkey.SELLSTOCKINFO
-        self.recall_key = "BK:RECALL:INFO"
-        llen = redis_client.llen(self.bs_key)
-        if llen > 0:
-            try:
-                self.trade_user = easytrader.use('universal_client')
-                self.trade_user.connect(self.thx_path)
-                self.trade_user.enable_type_keys_for_editor()
-                self.set_cmd_top()
-            except:
-                app.logger.info("自动交易失败，客户端连接错误")
-                return
-            while True:
-                if self.trynum >= 9:
-                    app.logger.info("交易程序出错,重试次数:{num}".format(num=self.trynum))
+        try:
+            self.trade_user = easytrader.use('universal_client')
+            self.trade_user.connect(self.thx_path)
+            self.trade_user.enable_type_keys_for_editor()
+            self.set_cmd_top()
+        except:
+            app.logger.info("自动交易失败，客户端连接错误")
+            return
+        # 用來交易
+        if bs_type == 'diff_buy' or bs_type == 'diff_sell':
+            llen = redis_client.llen(self.bs_key)
+            if llen > 0:
+                while True:
+                    if self.trynum >= 9:
+                        app.logger.info("交易程序出错,重试次数:{num}".format(num=self.trynum))
+                        self.stock_json_str = redis_client.lpop(self.bs_key)
+                        break
+                    llen = redis_client.llen(self.bs_key)
+                    if llen == 0:
+                        break
                     self.stock_json_str = redis_client.lpop(self.bs_key)
-                    break
-                llen = redis_client.llen(self.bs_key)
-                if llen == 0:
-                    break
-                self.stock_json_str = redis_client.lpop(self.bs_key)
-                self.bs_type = bs_type
-                self.auto_trade()
-                # time.sleep(2)
-
+                    self.bs_type = bs_type
+                    self.auto_trade()
+                    # time.sleep(2)
+        elif bs_type == 'diff_search':
+            app.logger.info("查询持仓信息")
+            self.auto_search()
+        elif bs_type == 'diff_cancel':
+            app.logger.info("开始全部撤单")
+            self.auto_cancel()
     def get_all_hwnd(self,hwnd, mouse): 
         if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
             self.hwnd_map.update({hwnd: win32gui.GetWindowText(hwnd)})
-
     # cmd窗口置顶
     def set_cmd_top(self):
         win32gui.EnumWindows(self.get_all_hwnd, 0)
@@ -68,7 +72,16 @@ class AutoTrade:
                     win32gui.SetForegroundWindow(h)
                     # 解决被最小化的情况
                     win32gui.ShowWindow(h, win32con.SW_RESTORE)
-
+    def auto_cancel(self):
+        msg= self.trade_user.cancel_all_entrusts()
+        app.logger.info("全部撤單-股票,结果:{msg}".format(msg=msg))
+    def auto_search(self):
+        # 当日成交
+        # self.trade_user.today_trades
+        # 当日委托
+        # self.trade_user.today_entrusts
+        msg = ""
+        app.logger.info("查询挂单信息-股票:{msg}".format(msg=self.trade_user.position))
     def auto_trade(self):
         try:
             stock_json = json.loads(self.stock_json_str)
@@ -91,13 +104,13 @@ class AutoTrade:
                             if stock_row['deal_type'] == 0:
                                 newet_price = stock_row['newet_price']
                                 if newet_price != 0 and newet_price < buy_price:
-                                    price = newet_price + 0.05
+                                    price = newet_price + 0.01
                                 else:
-                                    price = buy_price + 0.05
+                                    price = buy_price + 0.01
                                 price = '{:.2f}'.format(price)
                                 msg = self.trade_user.buy(individual_code, price=price, amount=bs_num)
                             else:
-                                price = buy_price + 0.05
+                                price = buy_price + 0.01
                                 msg = self.trade_user.market_buy(individual_code,amount=bs_num)
                             entrust_no = ""
                             if 'entrust_no' in msg:
@@ -118,13 +131,6 @@ class AutoTrade:
                                 entrust_no = msg.get('entrust_no')
                                 redis_client.rpush(self.recall_key,entrust_no)
                             app.logger.info("卖出-股票:{individual_code},数量:{bs_num},结果:{msg},entrust_no:{entrust_no}".format(individual_code=individual_code, bs_num=bs_num, msg=msg,entrust_no=entrust_no))
-                        elif self.bs_type == 'diff_search':
-                            # 当日成交
-                            self.trade_user.today_trades
-                            # 当日委托
-                            self.trade_user.today_entrusts
-                            msg = ""
-                            # app.logger.info("查询挂单信息-股票:{individual_code},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, bs_num=bs_num, msg=msg))
                     except easytrader.exceptions.TradeError as err:
                         app.logger.info("自动交易失败:{0}".format(err))
                         redis_client.rpush(self.bs_key,self.stock_json_str)
