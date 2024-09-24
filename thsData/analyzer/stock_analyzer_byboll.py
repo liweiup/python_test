@@ -16,6 +16,7 @@ class StockAnalyzer:
 
     def download_data(self):
         data = yf.download(self.ticker, start=self.start_date, end=self.end_date)
+        print(data)
         data.index = pd.to_datetime(data.index, errors='coerce')
         if data.empty:
             logging.error("No valid data available after removing NaN values.")
