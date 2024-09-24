@@ -1,61 +1,60 @@
 import yfinance as yf
-import pandas as pd
 import numpy as np
-import mplfinance as mpf
-# 下载贵州茅台的历史数据
-ticker = '600010.SS'
-data = yf.download(ticker, start='2024-08-01', end='2024-09-23')
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# 计算每日收益率
-data['Daily_Return'] = data['Close'].pct_change()
+# 下载股票数据
+ticker = '600550.SS'
+data = yf.download(ticker, start='2024-06-01', end='2024-12-31')
 
-# 去除 NaN 值
-data = data.dropna()
+# 计算移动平均线
+data['MA20'] = data['Close'].rolling(window=20).mean()
 
-# 计算过去N天的日收益率标准差
-def calculate_volatility(df, window):
-    return df['Daily_Return'].rolling(window=window).std() * np.sqrt(252)  # 年化标准差
+# 计算价格波动率
+data['PriceChange'] = data['Close'].pct_change()
+data['Volatility'] = data['PriceChange'].rolling(window=20).std()
 
-# 选择一个窗口大小，例如20天
-window_size = 20
-data['Volatility'] = calculate_volatility(data, window_size)
+# 计算成交量变化率
+data['VolumeChange'] = data['Volume'].pct_change()
 
-# 计算简单移动平均线 (SMA)
-short_window = 20
-long_window = 50
-data['SMA_short'] = data['Close'].rolling(window=short_window).mean()
-data['SMA_long'] = data['Close'].rolling(window=long_window).mean()
+# 判断是否经历了洗盘
+shakeout_threshold_volatility = 0.02  # 波动率阈值
+shakeout_threshold_volume = 0.5       # 成交量变化率阈值
 
-# 判断横盘
-def is_sideways_market(df, volatility_threshold, sma_diff_threshold):
-    # 获取最近一天的数据
-    last_day = df.iloc[-1]
-    
-    # 检查波动率是否低于阈值
-    if last_day['Volatility'] < volatility_threshold:
-        # 检查短期和长期移动平均线之间的差异是否小于阈值
-        sma_diff = abs(last_day['SMA_short'] - last_day['SMA_long'])
-        if sma_diff < sma_diff_threshold:
-            return True
-    return False
-
-# 定义阈值
-volatility_threshold = 0.05  # 波动率阈值
-sma_diff_threshold = 0.05 * data['Close'].iloc[-1]  # 移动平均线差异阈值
-
-# 检查最近一段时间内是否为横盘
-if is_sideways_market(data, volatility_threshold, sma_diff_threshold):
-    print(f"{ticker} 最近可能处于横盘状态。")
-else:
-    print(f"{ticker} 最近可能不处于横盘状态。")
+data['IsShakeout'] = (data['Volatility'] > shakeout_threshold_volatility) & (data['VolumeChange'] > shakeout_threshold_volume)
 
 # 打印结果
-print(data[['Close', 'Daily_Return', 'Volatility', 'SMA_short', 'SMA_long']].tail())
+print(f"Summary for {ticker}:")
+print(f"Latest Close Price: {data['Close'].iloc[-1]}")
+print(f"Latest Volatility: {data['Volatility'].iloc[-1]}")
+print(f"Latest VolumeChange: {data['VolumeChange'].iloc[-1]}")
+print(f"Is Shakeout: {data['IsShakeout'].iloc[-1]}")
 
-# 绘制K线图
-mpf.plot(data, type='candle', style='charles',
+# 绘制K线图并标记洗盘区间
+import mplfinance as mpf
+
+mc = mpf.make_marketcolors(
+    up='green', down='red', edge='i', wick='i', volume='in', inherit=True
+)
+
+s = mpf.make_mpf_style(
+    marketcolors=mc, 
+    gridstyle='-', 
+    gridcolor='gray', 
+    figcolor='(0.82, 0.83, 0.85)', 
+    facecolor='(0.82, 0.83, 0.85)', 
+    edgecolor='(0.82, 0.83, 0.85)'
+)
+
+apds = [
+    mpf.make_addplot(data['MA20'], color='blue', width=1.0),
+    mpf.make_addplot(data['IsShakeout'].astype(int) * data['Close'], type='scatter', markersize=50, marker='o', color='orange')
+]
+
+mpf.plot(data, type='candle', style=s,
          title=f'{ticker} K线图',
          ylabel='价格',
          ylabel_lower='成交量',
          volume=True,
+         addplot=apds,
          figsize=(12, 8))
