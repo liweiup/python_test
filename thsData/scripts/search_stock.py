@@ -17,6 +17,7 @@ def search_stock(c_date,phase_length=10):
     try:
         with MySQLConnector() as db:
             results = db.execute_query(sql_query,(c_date,))
+            print(results)
             print(f"Query executed. Number of results: {len(results)}")
             if not results:
                 print("No results found for the given date.")

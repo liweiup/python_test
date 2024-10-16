@@ -16,7 +16,6 @@ class StockAnalyzer:
 
     def download_data(self):
         data = yf.download(self.ticker, start=self.start_date, end=self.end_date)
-        print(data)
         data.index = pd.to_datetime(data.index, errors='coerce')
         if data.empty:
             logging.error("No valid data available after removing NaN values.")
@@ -128,7 +127,7 @@ class StockAnalyzer:
                 trend_str = "Down"
             else:
                 trend_str = "No Trend"
-            print(f"{index.date()}: {trend_str}")
+            # print(f"{index.date()}: {trend_str}")
 
 # Example usage
 if __name__ == "__main__":

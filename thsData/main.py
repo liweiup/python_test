@@ -1,7 +1,5 @@
 import sys
 import os
-import sqlite3
-print(sqlite3.sqlite_version)
 # 将项目根目录添加到 Python 路径
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
@@ -27,10 +25,10 @@ def find_project_root(filename="requirements.txt"):
             return current_dir
         current_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
     raise FileNotFoundError(f"Could not find {filename} in any parent directory")
-
 def main():
     test_stock_analyzer()
     project_root = find_project_root()
     print(project_root)
 if __name__ == "__main__":
-    main()
+    search_stock('2024-09-10')
+    # main()
