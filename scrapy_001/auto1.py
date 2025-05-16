@@ -1,73 +1,9 @@
-import json  
-from collections import defaultdict  
-  
-# 输入的JSON字符串  
-json_string = '''  
-{  
-    "_id": "rowId_2",  
-    "recorddate": "2023-11-22 00:00:00",  
-    "lineno": 10,  
-    "recncStatus": "not_reconciled",  
-    "discountTaxType": "0",  
-    "priceMark": 0,  
-    "totalBillOriSum": 0,  
-    "totalBillNatSum": 0,  
-    "billSubQty": 0,  
-    "billqty": 0,  
-    "reverseInvoiceQty": 0,  
-    "sqty": 0,  
-    "checkingSettlementQty": 0,  
-    "deductMessQty": 0,  
-    "totalReturnQty": 0,  
-    "smoney": 0,  
-    "sfee": 0,  
-    "aggregated": false,  
-    "expenseOriSum": 0,  
-    "expenseOriMoney": 0,  
-    "expenseNatSum": 0,  
-    "expenseNatMoney": 0,  
-    "_colErrorField": "productsku_cCode",  
-    "_status": "Insert",  
-    "oriTaxUnitPrice": null,  
-    "qty": null,  
-    "priceQty": null,  
-    "invPriceExchRate": 1,  
-    "taxRate": 0,  
-    "oriUnitPrice": null,  
-    "oriTax": null,  
-    "oriMoney": null,  
-    "oriSum": null,  
-    "natUnitPrice": null,  
-    "natTaxUnitPrice": null,  
-    "natTax": null,  
-    "natMoney": null,  
-    "natSum": null,  
-    "subQty": null,  
-    "invExchRate": 1,  
-    "unDeductTax": null,  
-    "oriUnDeductTax": null,  
-    "costMoney": null,  
-    "costUnitPrice": null,  
-    "oriCostUnitPrice": null,  
-    "oriCostMoney": null,  
-    "sourceGrandchildrenId": null,  
-    "firstsourceGrandchildrenId": null,  
-    "sourceOrderlineno": null,  
-    "firstgrandlineno": null,  
-    "uplineno": null,  
-    "makeproduct": null,  
-    "priceUOM_Precision": 2,  
-    "stockUnitId_Precision": 2,  
-    "contactsQuantity": null,  
-    "contactsPieces": null,  
-    "budgetUnitPrice": null,  
-    "budgetMoney": null,  
-    "warehouseMaterialCheckRule": "1",  
-    "propertiesValue": null,  
-    "rowno": 1  
-}  
-'''  
-# 将JSON字符串转换为Python字典对象  
-data = json.loads(json_string)  
-print(data)
-# 使用defaultdict来存储以值类型为键的字典对象，值为原字典的值的数量（如果有多个相同值）或该值的类型（如果该值为null）加上该值的名称（如果该值为null）或该值的值（如果该值不是null）加上该值的名称（如果该值不是null））））））））））））））））                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   result = defaultdict(lambda: defaultdict(str)) # 使用defaultdict来存储以值类型为键的字典对象，值为原字典的值的数量（如果有多个相同值）或该值的类型（如果该值为null）加上该值的名称（如果该值为null）或该值的值（如果该值不是null）加上该值的名称（如果该值不是null）")result = defaultdict(lambda: defaultdict(str)) # 使用defaultdict来存储以值类型为键的字典对象，值为原字典的值的数量（如果有多个相同值）或该值的类型（如果该值为null）加上该值的名称（如果该值为null）或该值的值（如果该值不是null）加上该值的名称（如果该值不是null）")result = defaultdict(lambda: defaultdict(str)) # 使用defaultdict来存储以值类型为键的字典对象，值为原字典的
+from dbfread import DBF
+
+# 打开DBF文件
+dbf_file = DBF('/Users/bird/Downloads/NNC_DATA02_08.DBF',encoding='latin1')
+
+# 遍历DBF文件中的所有记录
+for record in dbf_file:
+    print(record)
+    exit
