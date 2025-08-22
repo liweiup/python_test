@@ -57,8 +57,13 @@ class RedisSub(threading.Thread):
                         data = _to_str(message.get("data"))
                         if self.app:
                             self.app.logger.warning(f"{channel}:{data}")
-                        # from app.service.auto_trade import AutoTrade
-                        # AutoTrade(channel)
+                        # 使用工厂函数创建AutoTrade实例
+                        from app.service.auto_trade import create_auto_trade
+                        try:
+                            auto_trade = create_auto_trade(channel, app_instance=self.app)
+                        except Exception as e:
+                            if self.app:
+                                self.app.logger.warning(f"创建AutoTrade实例失败: {e}")
                     elif msg_type == "subscribe":
                         channel = _to_str(message.get("channel"))
                         if self.app:
