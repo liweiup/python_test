@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sys
+import os
 from app import create_app
 from app.api.cms.model.group import Group
 from app.api.cms.model.group_permission import GroupPermission
@@ -7,15 +9,27 @@ from app.api.cms.model.user import User
 from app.api.cms.model.user_group import UserGroup
 from app.api.cms.model.user_identity import UserIdentity
 from app.config.code_message import MESSAGE
-app = create_app(
-    group_model=Group,
-    user_model=User,
-    group_permission_model=GroupPermission,
-    permission_model=Permission,
-    identity_model=UserIdentity,
-    user_group_model=UserGroup,
-    config_MESSAGE=MESSAGE,
-)
+
+try:
+    app = create_app(
+        group_model=Group,
+        user_model=User,
+        group_permission_model=GroupPermission,
+        permission_model=Permission,
+        identity_model=UserIdentity,
+        user_group_model=UserGroup,
+        config_MESSAGE=MESSAGE,
+    )
+    
+    app.logger.info("Application created successfully")
+    app.logger.info(f"Current working directory: {os.getcwd()}")
+    app.logger.info(f"Python executable: {sys.executable}")
+    
+except Exception as e:
+    print(f"Error creating app: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
 
 
 if app.config.get("ENV") != "production":
@@ -75,11 +89,20 @@ if app.config.get("ENV") != "production":
 
 
 if __name__ == "__main__":
-    app.logger.warning(
-        """
-        ----------------------------
-        |  app.run() => flask run  |
-        ----------------------------
-        """
-    )
-    app.run()
+    try:
+        app.logger.info("Starting Flask development server...")
+        app.logger.warning(
+            """
+            ----------------------------
+            |  app.run() => flask run  |
+            ----------------------------
+            """
+        )
+        app.run(host='127.0.0.1', port=5000, debug=False)
+    except Exception as e:
+        app.logger.error(f"Error starting server: {e}")
+        import traceback
+        app.logger.error(traceback.format_exc())
+        print(f"Error starting server: {e}")
+        traceback.print_exc()
+        sys.exit(1)

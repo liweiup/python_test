@@ -95,6 +95,9 @@ def create_app(register_all=True, **kwargs):
     # 加载配置
     load_app_config(app)
     
+    # 配置日志
+    setup_logging(app)
+    
     if register_all:
         from lin import Lin
         register_blueprints(app)
@@ -105,3 +108,69 @@ def create_app(register_all=True, **kwargs):
         register_cli(app)
         register_redis(app)
     return app
+
+
+def setup_logging(app):
+    """配置应用日志"""
+    import logging
+    from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+    import os
+    from datetime import datetime
+    
+    log_config = app.config.get("LOG", {})
+    
+    # 创建日志目录
+    log_dir = log_config.get("DIR", "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # 设置日志级别
+    log_level = getattr(logging, log_config.get("LEVEL", "DEBUG").upper(), logging.DEBUG)
+    app.logger.setLevel(log_level)
+    
+    # 初始化日志文件路径
+    log_file = "Console only"
+    
+    # 如果配置了文件日志且还没有文件handler
+    if log_config.get("FILE", True):
+        # 生成带时间戳的日志文件名
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+        log_file = os.path.join(log_dir, f"{timestamp}.log")
+        max_bytes = log_config.get("SIZE_LIMIT", 5 * 1024 * 1024)  # 5MB
+        
+        # 检查是否已有文件handler
+        has_file_handler = any(
+            isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)) 
+            for handler in app.logger.handlers
+        )
+        
+        if not has_file_handler:
+            # 使用TimedRotatingFileHandler按天轮转
+            file_handler = TimedRotatingFileHandler(
+                log_file, 
+                when='midnight',  # 每天午夜轮转
+                interval=1,       # 间隔1天
+                backupCount=30,   # 保留30天的日志
+                encoding="utf-8"
+            )
+            file_handler.setLevel(log_level)
+            
+            # 设置格式
+            formatter = logging.Formatter(
+                "%(asctime)s %(levelname)s %(name)s %(message)s"
+            )
+            file_handler.setFormatter(formatter)
+            
+            # 设置轮转后的文件名格式
+            file_handler.suffix = "%Y-%m-%d.log"
+            
+            app.logger.addHandler(file_handler)
+            app.logger.info(f"Logging configured - file: {log_file}")
+    
+    # 添加启动信息
+    app.logger.info("=" * 50)
+    app.logger.info("Flask application starting...")
+    app.logger.info(f"Environment: {app.config.get('ENV', 'unknown')}")
+    app.logger.info(f"Debug mode: {app.config.get('DEBUG', False)}")
+    app.logger.info(f"Log level: {log_config.get('LEVEL', 'DEBUG')}")
+    app.logger.info(f"Log file: {log_file}")
+    app.logger.info("=" * 50)
