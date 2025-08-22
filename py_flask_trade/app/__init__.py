@@ -132,8 +132,12 @@ def create_app(register_all=True, **kwargs):
 
 def setup_logging(app):
     """配置应用日志"""
+    # 检查是否已经配置过日志，避免重复配置
+    if hasattr(app, '_logging_configured') and app._logging_configured:
+        return
+    
     import logging
-    from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+    from logging.handlers import RotatingFileHandler
     import os
     from datetime import datetime
     
@@ -152,23 +156,22 @@ def setup_logging(app):
     
     # 如果配置了文件日志且还没有文件handler
     if log_config.get("FILE", True):
-        # 生成带时间戳的日志文件名
+        # 生成带日期的日志文件名
         timestamp = datetime.now().strftime("%Y-%m-%d")
         log_file = os.path.join(log_dir, f"{timestamp}.log")
         max_bytes = log_config.get("SIZE_LIMIT", 5 * 1024 * 1024)  # 5MB
         
         # 检查是否已有文件handler
         has_file_handler = any(
-            isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)) 
+            isinstance(handler, RotatingFileHandler) 
             for handler in app.logger.handlers
         )
         
         if not has_file_handler:
-            # 使用TimedRotatingFileHandler按天轮转
-            file_handler = TimedRotatingFileHandler(
+            # 使用RotatingFileHandler，每天手动创建新文件
+            file_handler = RotatingFileHandler(
                 log_file, 
-                when='midnight',  # 每天午夜轮转
-                interval=1,       # 间隔1天
+                maxBytes=max_bytes,
                 backupCount=30,   # 保留30天的日志
                 encoding="utf-8"
             )
@@ -180,17 +183,17 @@ def setup_logging(app):
             )
             file_handler.setFormatter(formatter)
             
-            # 设置轮转后的文件名格式
-            file_handler.suffix = "%Y-%m-%d.log"
-            
             app.logger.addHandler(file_handler)
             app.logger.info(f"Logging configured - file: {log_file}")
     
-    # 添加启动信息
-    app.logger.info("=" * 50)
-    app.logger.info("Flask application starting...")
-    app.logger.info(f"Environment: {app.config.get('ENV', 'unknown')}")
-    app.logger.info(f"Debug mode: {app.config.get('DEBUG', False)}")
-    app.logger.info(f"Log level: {log_config.get('LEVEL', 'DEBUG')}")
-    app.logger.info(f"Log file: {log_file}")
-    app.logger.info("=" * 50)
+    # 标记日志已配置，避免重复配置
+    app._logging_configured = True
+    
+    # # 添加启动信息
+    # app.logger.info("=" * 50)
+    # app.logger.info("Flask application starting...")
+    # app.logger.info(f"Environment: {app.config.get('ENV', 'unknown')}")
+    # app.logger.info(f"Debug mode: {app.config.get('DEBUG', False)}")
+    # app.logger.info(f"Log level: {log_config.get('LEVEL', 'DEBUG')}")
+    # app.logger.info(f"Log file: {log_file}")
+    # app.logger.info("=" * 50)

@@ -98,7 +98,18 @@ if __name__ == "__main__":
             ----------------------------
             """
         )
-        app.run(host='127.0.0.1', port=5000, debug=False)
+        
+        # 检查是否在打包环境中
+        import sys
+        if getattr(sys, 'frozen', False):
+            # 打包环境，禁用reloader
+            app.logger.info("Running in packaged environment, disabling reloader")
+            app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+        else:
+            # 开发环境，可以启用reloader
+            app.logger.info("Running in development environment")
+            app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+            
     except Exception as e:
         app.logger.error(f"Error starting server: {e}")
         import traceback
