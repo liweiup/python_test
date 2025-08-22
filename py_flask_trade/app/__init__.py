@@ -27,17 +27,8 @@ def register_cli(app):
 def register_redis(app):
     from app.cli.redis.client import redis_client
     from app.cli.redis.redis_sub import RedisSub
-    import os
-    import sys
-    
     try:
-        # 检查是否在打包环境中 - 使用更可靠的检测方法
-        is_packaged = getattr(sys, 'frozen', False) or getattr(os, '_MEIPASS', None)
-        if is_packaged:
-            # PyInstaller打包环境，跳过Redis启动
-            app.logger.warning("Running in packaged environment, skipping Redis subscription")
-            return
-            
+        # 初始化Redis客户端
         redis_client.init_app(app, health_check_interval=30)
         
         # 获取Redis订阅配置
@@ -46,8 +37,8 @@ def register_redis(app):
             app.logger.warning("No Redis subscription configured, skipping RedisSub")
             return
             
-        # 启动Redis订阅线程
-        redis_sub = RedisSub(set(str.split(redis_sub_config, ",")))
+        # 启动Redis订阅线程，传递app实例
+        redis_sub = RedisSub(set(str.split(redis_sub_config, ",")), app_instance=app)
         redis_sub.start()
         app.logger.warning(f"Redis subscription started for channels: {redis_sub_config}")
         
