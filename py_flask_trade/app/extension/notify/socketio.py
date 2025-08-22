@@ -2,12 +2,12 @@ from flask_socketio import SocketIO
 import os
 
 # 检测环境并设置合适的async_mode
-async_mode = 'gevent'  # 默认使用gevent
+async_mode = 'threading'  # 默认使用threading，最安全
 
-# 在打包环境中强制使用gevent
+# 在打包环境中强制使用threading
 if getattr(os, '_MEIPASS', None):
     # PyInstaller打包环境
-    async_mode = 'gevent'
+    async_mode = 'threading'
 else:
     # 开发环境，尝试自动检测
     try:

@@ -57,11 +57,22 @@ def load_app_config(app):
     根据指定配置环境自动加载对应环境变量和配置类到app config
     """
     # 根据传入环境加载对应配置
-    env = app.config.get("ENV")
-    # 读取 .env
-    load_dotenv(os.path.join(basedir, ".{env}.env").format(env=env))
-    # 读取配置类
-    app.config.from_object("app.config.{env}.{Env}Config".format(env=env, Env=env.capitalize()))
+    env = app.config.get("ENV", "development")
+    
+    # 读取 .env 文件
+    env_file = os.path.join(basedir, ".{env}.env".format(env=env))
+    if os.path.exists(env_file):
+        load_dotenv(env_file)
+    
+    # 尝试加载配置类
+    try:
+        config_path = "app.config.{env}.{Env}Config".format(env=env, Env=env.capitalize())
+        app.config.from_object(config_path)
+    except ImportError:
+        # 如果配置类不存在，使用基础配置
+        print(f"Warning: 配置类 {config_path} 不存在，使用基础配置")
+        from app.config.base import BaseConfig
+        app.config.from_object(BaseConfig)
 
 
 def set_global_config(**kwargs):
@@ -76,10 +87,16 @@ def set_global_config(**kwargs):
 def create_app(register_all=True, **kwargs):
     # 全局配置优先生效
     set_global_config(**kwargs)
-    # http wsgi server托管启动需指定读取环境配置
-    load_dotenv(os.path.join(basedir, ".flaskenv"))
+    
+    # 创建Flask应用
     app = Flask(__name__, static_folder=os.path.join(basedir, "assets"))
+    
+    # 设置默认环境
+    app.config['ENV'] = 'development'
+    
+    # 加载配置
     load_app_config(app)
+    
     if register_all:
         from lin import Lin
         register_blueprints(app)
