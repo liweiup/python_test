@@ -1,20 +1,68 @@
 @echo off
-echo 🚀 开始打包Flask应用为exe...
+setlocal enabledelayedexpansion
 
-REM 检查环境
-python -c "import pyinstaller" 2>nul
+echo 🚀 Starting Flask app packaging...
+echo Current directory: %CD%
+echo.
+
+REM Check if conda is available
+echo Checking conda availability...
+where conda >nul 2>nul
 if errorlevel 1 (
-    echo ❌ PyInstaller未安装，正在安装...
-    pip install pyinstaller
+    echo ❌ Conda not found in PATH
+    echo Please ensure conda is installed and in your PATH
+    pause
+    exit /b 1
+)
+echo ✅ Conda found
+
+REM Check if environment exists
+echo Checking if py_flask_trade environment exists...
+conda env list | findstr "py_flask_trade" >nul
+if errorlevel 1 (
+    echo ❌ Environment 'py_flask_trade' not found
+    echo Please run setup_conda.sh first
+    pause
+    exit /b 1
+)
+echo ✅ Environment py_flask_trade found
+
+REM Get conda base path
+for /f "tokens=*" %%i in ('conda info --base') do set CONDA_BASE=%%i
+echo Conda base path: %CONDA_BASE%
+
+REM Check if PyInstaller is installed in the environment
+echo Checking PyInstaller installation...
+call "%CONDA_BASE%\Scripts\activate.bat" py_flask_trade
+python -c "import PyInstaller" 2>nul
+if errorlevel 1 (
+    echo ❌ PyInstaller not installed in py_flask_trade environment
+    echo Installing PyInstaller...
+    python -m pip install pyinstaller
+    if errorlevel 1 (
+        echo ❌ Failed to install PyInstaller
+        pause
+        exit /b 1
+    )
+    echo ✅ PyInstaller installed successfully
+) else (
+    echo ✅ PyInstaller already installed
 )
 
-REM 创建必要的目录
-if not exist "logs" mkdir logs
-if not exist "data" mkdir data
+REM Create necessary directories
+echo Creating necessary directories...
+if not exist "logs" (
+    mkdir logs
+    echo ✅ Created logs directory
+)
+if not exist "data" (
+    mkdir data
+    echo ✅ Created data directory
+)
 
-REM 创建本地配置文件（如果不存在）
+REM Create local config file if not exists
 if not exist ".env" (
-    echo ⚙️ 创建本地环境配置...
+    echo ⚙️ Creating local environment config...
     (
         echo SQLALCHEMY_DATABASE_URI = 'sqlite:///./lincms_local.db'
         echo SECRET_KEY = 'local_development_secret_key_2024'
@@ -26,31 +74,82 @@ if not exist ".env" (
         echo FLASK_ENV = "local"
         echo FLASK_DEBUG = True
     ) > .env
+    echo ✅ Created .env file
 )
 
-REM 清理之前的构建
-echo 🧹 清理之前的构建文件...
-if exist "build" rmdir /s /q build
-if exist "dist" rmdir /s /q dist
-if exist "__pycache__" rmdir /s /q __pycache__
+REM Check if spec file exists
+if not exist "pyinstaller_config.spec" (
+    echo ❌ pyinstaller_config.spec not found
+    echo Please ensure you're in the project root directory
+    echo Current directory: %CD%
+    pause
+    exit /b 1
+)
+echo ✅ Found pyinstaller_config.spec
 
-REM 使用spec文件打包
-echo 📦 开始打包...
-pyinstaller pyinstaller_config.spec
+REM Clean previous builds
+echo 🧹 Cleaning previous build files...
+if exist "build" (
+    rmdir /s /q build
+    echo ✅ Removed build directory
+)
+if exist "dist" (
+    rmdir /s /q dist
+    echo ✅ Removed dist directory
+)
+if exist "__pycache__" (
+    rmdir /s /q __pycache__
+    echo ✅ Removed __pycache__ directory
+)
 
-REM 检查打包结果
-if exist "dist\flask_cms_app.exe" (
-    echo ✅ 打包成功！
-    echo 📍 可执行文件位置: dist\flask_cms_app.exe
+REM Start packaging using activated environment
+echo.
+echo 📦 Starting packaging...
+echo This may take several minutes...
+echo.
+
+REM Ensure we're still in the correct environment
+call "%CONDA_BASE%\Scripts\activate.bat" py_flask_trade
+python -m PyInstaller pyinstaller_config.spec
+set PACKAGE_RESULT=%errorlevel%
+
+if %PACKAGE_RESULT% neq 0 (
     echo.
-    echo 🔧 使用方法：
-    echo 1. 进入dist目录: cd dist
-    echo 2. 运行程序: flask_cms_app.exe
-    echo 3. 访问地址: http://127.0.0.1:5000
-) else (
-    echo ❌ 打包失败，请检查错误信息
+    echo ❌ Packaging failed with error code: %PACKAGE_RESULT%
+    echo Please check the error messages above
     pause
     exit /b 1
 )
 
-pause 
+REM Check packaging result
+echo.
+echo Checking packaging result...
+if exist "dist\flask_cms_app.exe" (
+    echo ✅ Packaging successful!
+    echo 📍 Executable location: dist\flask_cms_app.exe
+    echo 📁 File size: 
+    dir "dist\flask_cms_app.exe" | findstr "flask_cms_app.exe"
+    echo.
+    echo 🔧 Usage:
+    echo 1. Go to dist directory: cd dist
+    echo 2. Run program: flask_cms_app.exe
+    echo 3. Access URL: http://127.0.0.1:5000
+    echo.
+    echo 🎉 Build completed successfully!
+) else (
+    echo ❌ Packaging failed - executable not found
+    echo Please check error messages above
+    echo.
+    echo Checking dist directory contents:
+    if exist "dist" (
+        dir dist
+    ) else (
+        echo dist directory does not exist
+    )
+    pause
+    exit /b 1
+)
+
+echo.
+echo Press any key to exit...
+pause >nul 

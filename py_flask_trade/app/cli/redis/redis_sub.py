@@ -44,23 +44,23 @@ class RedisSub(threading.Thread):
                     if msg_type == "message":
                         channel = _to_str(message.get("channel"))
                         data = _to_str(message.get("data"))
-                        app.logger.info(f"{channel}:{data}")
+                        app.logger.warning(f"{channel}:{data}")
                         # from app.service.auto_trade import AutoTrade
                         # AutoTrade(channel)
                     elif msg_type == "subscribe":
                         channel = _to_str(message.get("channel"))
-                        app.logger.info(f"subscribed: {channel}")
+                        app.logger.warning(f"subscribed: {channel}")
 
                     # 收到有效消息后重置退避时间
                     backoff_seconds = 1
 
                 except json.decoder.JSONDecodeError as err:
-                    app.logger.info(f"redis json decode error: {err}")
+                    app.logger.warning(f"redis json decode error: {err}")
                     time.sleep(0.5)
                 except TimeoutError as err:
-                    app.logger.info(f"redis timeout: {err}")
+                    app.logger.warning(f"redis timeout: {err}")
                     time.sleep(3)
                 except Exception as err:
-                    app.logger.info(f"redis unknown connect error: {err}")
+                    app.logger.warning(f"redis unknown connect error: {err}")
                     time.sleep(min(backoff_seconds, 5))
                     backoff_seconds = min(backoff_seconds * 2, 10)

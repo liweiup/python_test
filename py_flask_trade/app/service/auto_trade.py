@@ -31,7 +31,7 @@ class AutoTrade:
             self.trade_user.enable_type_keys_for_editor()
             self.set_cmd_top()
         except:
-            app.logger.info("自动交易失败，客户端连接错误")
+            app.logger.warning("自动交易失败，客户端连接错误")
             return
         # 用來交易
         if bs_type == 'diff_buy' or bs_type == 'diff_sell':
@@ -39,7 +39,7 @@ class AutoTrade:
             if llen > 0:
                 while True:
                     if self.trynum >= 9:
-                        app.logger.info("交易程序出错,重试次数:{num}".format(num=self.trynum))
+                        app.logger.warning("交易程序出错,重试次数:{num}".format(num=self.trynum))
                         self.stock_json_str = redis_client.lpop(self.bs_key)
                         break
                     llen = redis_client.llen(self.bs_key)
@@ -50,10 +50,10 @@ class AutoTrade:
                     self.auto_trade()
                     # time.sleep(2)
         elif bs_type == 'diff_search':
-            app.logger.info("查询持仓信息")
+            app.logger.warning("查询持仓信息")
             self.auto_search()
         elif bs_type == 'diff_cancel':
-            app.logger.info("开始全部撤单")
+            app.logger.warning("开始全部撤单")
             self.auto_cancel()
     def get_all_hwnd(self,hwnd, mouse): 
         if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
@@ -74,14 +74,14 @@ class AutoTrade:
                     win32gui.ShowWindow(h, win32con.SW_RESTORE)
     def auto_cancel(self):
         msg= self.trade_user.cancel_all_entrusts()
-        app.logger.info("全部撤單-股票,结果:{msg}".format(msg=msg))
+        app.logger.warning("全部撤單-股票,结果:{msg}".format(msg=msg))
     def auto_search(self):
         # 当日成交
         # self.trade_user.today_trades
         # 当日委托
         # self.trade_user.today_entrusts
         msg = ""
-        app.logger.info("查询挂单信息-股票:{msg}".format(msg=self.trade_user.position))
+        app.logger.warning("查询挂单信息-股票:{msg}".format(msg=self.trade_user.position))
     def auto_trade(self):
         try:
             stock_json = json.loads(self.stock_json_str)
@@ -116,7 +116,7 @@ class AutoTrade:
                             if 'entrust_no' in msg:
                                 entrust_no = msg.get('entrust_no')
                                 redis_client.rpush(self.recall_key,entrust_no)
-                            app.logger.info("买入-股票:{individual_code},价格:{price},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, price=price,bs_num=bs_num, msg=msg,entrust_no=entrust_no))
+                            app.logger.warning("买入-股票:{individual_code},价格:{price},数量:{bs_num},结果:{msg}".format(individual_code=individual_code, price=price,bs_num=bs_num, msg=msg,entrust_no=entrust_no))
                         elif self.bs_type == 'diff_sell':
                             price = stock_row['now_price']
                             bs_num = stock_row['stock_buy_num'] - rs_num + in_num
@@ -130,24 +130,24 @@ class AutoTrade:
                             if 'entrust_no' in msg:
                                 entrust_no = msg.get('entrust_no')
                                 redis_client.rpush(self.recall_key,entrust_no)
-                            app.logger.info("卖出-股票:{individual_code},数量:{bs_num},结果:{msg},entrust_no:{entrust_no}".format(individual_code=individual_code, bs_num=bs_num, msg=msg,entrust_no=entrust_no))
+                            app.logger.warning("卖出-股票:{individual_code},数量:{bs_num},结果:{msg},entrust_no:{entrust_no}".format(individual_code=individual_code, bs_num=bs_num, msg=msg,entrust_no=entrust_no))
                     except easytrader.exceptions.TradeError as err:
-                        app.logger.info("自动交易失败:{0}".format(err))
+                        app.logger.warning("自动交易失败:{0}".format(err))
                         redis_client.rpush(self.bs_key,self.stock_json_str)
                         self.trynum = self.trynum + 1
                     # print(user.balance)
                     # print(user.position)
                     # msg = user.buy(individual_code, price=price, amount=bs_num)
         except pywinauto.application.ProcessNotFoundError as err:
-            app.logger.info("检查同花顺客户端是否打开:{0}".format(err))
+            app.logger.warning("检查同花顺客户端是否打开:{0}".format(err))
             redis_client.rpush(self.bs_key,self.stock_json_str)
             self.trynum = self.trynum + 1
         except pywinauto.timings.TimeoutError:
-            app.logger.info("自动交易失败，pywinauto超时")
+            app.logger.warning("自动交易失败，pywinauto超时")
             redis_client.rpush(self.bs_key,self.stock_json_str)
             self.trynum = self.trynum + 1
         except:
-            app.logger.info("自动交易失败，未知错误")
+            app.logger.warning("自动交易失败，未知错误")
             redis_client.rpush(self.bs_key,self.stock_json_str)
             self.trynum = self.trynum + 1
 
