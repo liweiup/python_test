@@ -28,3 +28,4 @@ apscheduler==3.10.1
 tzlocal==4.2
 tzdata==2022.7
 pypiwin32
+pytesseract

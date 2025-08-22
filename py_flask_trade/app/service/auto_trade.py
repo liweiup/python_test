@@ -3,6 +3,7 @@ import json
 import subprocess
 import easytrader
 import time
+import traceback 
 import win32gui
 import win32con
 import win32com.client
@@ -10,7 +11,7 @@ import pywinauto
 from app.config import commonkey
 from app.config.trading import TradingConfig
 from app.cli.redis.client import redis_client
-
+from app.service.easytrader_patch import _patch_easytrader
 
 class AutoTrade:
     """自动交易类 - 优化版本"""
@@ -47,8 +48,7 @@ class AutoTrade:
             self.bs_key = commonkey.BUYSTOCKINFO
         elif self.bs_type == 'diff_sell':
             self.bs_key = commonkey.SELLSTOCKINFO
-        elif self.bs_type == 'diff_cancel':
-            self.bs_key = commonkey.CANCELSTOCKINFO
+
     
     def _init_trade_client(self):
         """初始化交易客户端"""
@@ -97,6 +97,9 @@ class AutoTrade:
         elif self.bs_type == 'diff_cancel':
             self._log("开始全部撤单")
             self.auto_cancel()
+        elif self.bs_type == 'diff_clear':
+            self._log("开始清仓操作")
+            self.auto_clear()
     
     def _process_trade_queue(self):
         """处理交易队列"""
@@ -225,9 +228,45 @@ class AutoTrade:
         """查询持仓信息"""
         try:
             position = self.trade_user.position
-            self._log(f"查询挂单信息-股票:{position}")
+            if not position:
+                self._log("未查询到持仓信息")
+                return
+            pretty_lines = []
+            for idx, pos in enumerate(position, 1):
+                line = (
+                    f"{idx}. 股票代码: {pos.get('证券代码', '')} | "
+                    f"名称: {pos.get('证券名称', '')} | "
+                    f"持仓: {pos.get('股票余额', '')} | "
+                    f"可用: {pos.get('可用余额', '')} | "
+                    f"成本价: {pos.get('成本价', '')} | "
+                    f"现价: {pos.get('市价', '')} | "
+                    f"盈亏: {pos.get('盈亏', '')}"
+                )
+                pretty_lines.append(line)
+            pretty_output = "\n".join(pretty_lines)
+            self._log(f"持仓信息:\n{pretty_output}")
         except Exception as e:
             self._log(f"查询持仓失败: {e}", level="error")
+    
+    def auto_clear(self):
+        """清仓操作：卖出所有持仓股票"""
+        try:
+            position = self.trade_user.position
+            if not position:
+                self._log("未查询到持仓信息，无法清仓")
+                return
+            for pos in position:
+                code = pos.get('证券代码', '')
+                available = pos.get('可用余额', 0)
+                if code and float(available) > 0:
+                    self._log(f"清仓卖出 股票:{code} 可用:{available}")
+                    try:
+                        msg = self.trade_user.market_sell(code, amount=int(float(available)))
+                        self._log(f"清仓卖出结果: 股票:{code}, 数量:{available}, 结果:{msg}")
+                    except Exception as e:
+                        self._log(f"清仓卖出失败: 股票:{code}, 错误:{e}", level="error")
+        except Exception as e:
+            self._log(f"清仓操作失败: {e}", level="error")
     
     def _log(self, message, level="warning"):
         """统一日志输出"""
