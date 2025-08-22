@@ -35,4 +35,4 @@ dependencies:
     - tzlocal==4.2
     - tzdata==2022.7
     - pymysql
-    # - pypiwin32==223 
+    - pypiwin32

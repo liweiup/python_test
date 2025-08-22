@@ -15,7 +15,7 @@ echo "📋 Conda版本:"
 
 
 # 创建环境
-echo "🔧 创建conda环境 'py_flask_trade'..."
+echo "🔧 创建conda环境 'py_flask_trade'... set CONDA_FORCE_32BIT=1"
 conda env create -f environment.yml
 
 # 激活环境

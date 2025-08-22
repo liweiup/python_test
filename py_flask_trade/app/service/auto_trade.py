@@ -1,4 +1,6 @@
+import os
 import json
+import subprocess
 import easytrader
 import time
 import win32gui
@@ -8,6 +10,7 @@ import pywinauto
 from app.config import commonkey
 from app.config.trading import TradingConfig
 from app.cli.redis.client import redis_client
+
 
 class AutoTrade:
     """自动交易类 - 优化版本"""
@@ -50,6 +53,31 @@ class AutoTrade:
     def _init_trade_client(self):
         """初始化交易客户端"""
         try:
+            # 检查同花顺交易客户端路径是否存在，如果不存在直接报错
+            if not os.path.exists(self.thx_path):
+                self._log(f"未找到同花顺交易客户端: {self.thx_path}", level="error")
+                raise FileNotFoundError(f"同花顺交易客户端未找到: {self.thx_path}")
+            # 检查程序是否已经运行
+            is_running = False
+            try:
+                # 尝试连接，如果成功则说明程序已运行
+                self.trade_user = easytrader.use('universal_client')
+                self.trade_user.connect(self.thx_path)
+                is_running = True
+            except:
+                # 连接失败，说明程序未运行，需要启动
+                is_running = False
+             # 如果程序没有启动，那么启动一下
+            if not is_running:
+                self._log("同花顺交易客户端未运行，正在启动...")
+                program_dir = os.path.dirname(self.thx_path)
+                subprocess.Popen(
+                            [self.thx_path],
+                            cwd=program_dir,  # 设置工作目录为程序所在目录
+                            shell=True        # 通过shell启动，更接近双击行为
+                        )
+                time.sleep(5)  # 等待程序启动
+
             self.trade_user = easytrader.use('universal_client')
             self.trade_user.connect(self.thx_path)
             self.trade_user.enable_type_keys_for_editor()

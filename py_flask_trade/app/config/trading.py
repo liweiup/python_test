@@ -12,7 +12,7 @@ class TradingConfig:
     DEFAULT_THX_PATH = r'D:\同花顺软件\同花顺\xiadan.exe'
     
     # 重试配置
-    MAX_RETRIES = 9
+    MAX_RETRIES = 3
     RETRY_DELAY = 2  # 秒
     
     # 交易配置

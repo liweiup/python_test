@@ -149,7 +149,7 @@ if exist "dist\flask_cms_app.exe" (
     pause
     exit /b 1
 )
-
+copy .\.development.env .\dist\
 echo.
 echo Press any key to exit...
 pause >nul 
