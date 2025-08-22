@@ -8,6 +8,7 @@ class RedisSub(threading.Thread):
     def __init__(self, chan_sub):
         threading.Thread.__init__(self)
         self.chan_sub = chan_sub
+        print(self.chan_sub)
     def run(self):
             while True:
                 obj = RedisHelper()
@@ -17,6 +18,7 @@ class RedisSub(threading.Thread):
                         message = redis_sub.get_message()
                         if message:
                             if message["type"] == "message":
+                                print(message)
                                 channel = str(message["channel"], encoding="utf-8")
                                 data = str(message["data"], encoding="utf-8")
                                 app.logger.info(channel + ":" + data)

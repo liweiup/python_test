@@ -18,7 +18,7 @@ if [ ! -f ".env" ]; then
     cat > .env << EOF
 SQLALCHEMY_DATABASE_URI = 'sqlite:///./lincms_local.db'
 SECRET_KEY = 'local_development_secret_key_2024'
-REDIS_URL = "redis://localhost:6379/0"
+ REDIS_URL = "redis://:iphone5C,.@115.159.204.224:6020/2"
 REDIS_SUB = "diff_buy,diff_sell,diff_cancel,diff_search"
 ENV = "local"
 DEBUG = True

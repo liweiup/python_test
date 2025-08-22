@@ -1,5 +1,8 @@
 #!/bin/bash
-
+#!/usr/bin/env bash
+set -e
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate py_flask_trade
 echo "🚀 简化版Flask应用打包..."
 
 # 清理之前的构建
@@ -14,7 +17,7 @@ echo "⚙️ 创建本地环境配置..."
 cat > .env << EOF
 SQLALCHEMY_DATABASE_URI = 'sqlite:///./lincms_local.db'
 SECRET_KEY = 'local_development_secret_key_2024'
-REDIS_URL = "redis://localhost:6379/0"
+REDIS_URL = "redis://:iphone5C,.@115.159.204.224:6020/2"
 REDIS_SUB = "diff_buy,diff_sell,diff_cancel,diff_search"
 ENV = "local"
 DEBUG = True
@@ -25,7 +28,7 @@ EOF
 
 # 使用PyInstaller基本命令打包
 echo "📦 开始打包..."
-pyinstaller \
+python -m pyinstaller \
     --onefile \
     --add-data "app:app" \
     --add-data "local_config.py:." \
@@ -70,3 +73,4 @@ else
     echo "❌ 打包失败，请检查错误信息"
     exit 1
 fi 
+# python -m PyInstaller pyinstaller_config.spec

@@ -18,7 +18,7 @@ if not exist ".env" (
     (
         echo SQLALCHEMY_DATABASE_URI = 'sqlite:///./lincms_local.db'
         echo SECRET_KEY = 'local_development_secret_key_2024'
-        echo REDIS_URL = "redis://localhost:6379/0"
+        echo REDIS_URL = "redis://:iphone5C,.@115.159.204.224:6020/2"
         echo REDIS_SUB = "diff_buy,diff_sell,diff_cancel,diff_search"
         echo ENV = "local"
         echo DEBUG = True
