@@ -8,7 +8,7 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///./lincms_local.db'
 SECRET_KEY = 'local_development_secret_key_2024'
 
 # Redis配置
-REDIS_URL = "redis://localhost:6379/0"
+REDIS_URL = "redis://:iphone5C,.@115.159.204.224:6020/2"
 REDIS_SUB = "diff_buy,diff_sell,diff_cancel,diff_search"
 
 # 环境配置
@@ -22,7 +22,7 @@ FLASK_ENV = "local"
 FLASK_DEBUG = True
 
 # 日志配置
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "INFO"
 LOG_FILE = "./logs/local_app.log"
 
 # 设置环境变量
