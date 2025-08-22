@@ -53,12 +53,12 @@ class RedisSub(threading.Thread):
                     if msg_type == "message":
                         channel = _to_str(message.get("channel"))
                         data = _to_str(message.get("data"))
-                        app.logger.info(f"{channel}:{data}")
+                        app.logger.warning(f"{channel}:{data}")
                         # from app.service.auto_trade import AutoTrade
                         # AutoTrade(channel)
                     elif msg_type == "subscribe":
                         channel = _to_str(message.get("channel"))
-                        app.logger.info(f"subscribed: {channel}")
+                        app.logger.warning(f"subscribed: {channel}")
 
                     # 收到有效消息后重置退避时间
                     backoff_seconds = 1
@@ -77,4 +77,4 @@ class RedisSub(threading.Thread):
                     # 如果连续失败超过一定次数，增加更长的等待时间
                     if backoff_seconds >= max_backoff:
                         app.logger.error("Redis connection failed repeatedly, waiting longer...")
-                        time.sleep(10)  # 额外等待10秒
+                        time.sleep(10)  # 额外等待10秒  

@@ -21,9 +21,9 @@ try:
         config_MESSAGE=MESSAGE,
     )
     
-    app.logger.info("Application created successfully")
-    app.logger.info(f"Current working directory: {os.getcwd()}")
-    app.logger.info(f"Python executable: {sys.executable}")
+    app.logger.warning("Application created successfully")
+    app.logger.warning(f"Current working directory: {os.getcwd()}")
+    app.logger.warning(f"Python executable: {sys.executable}")
     
 except Exception as e:
     print(f"Error creating app: {e}")
@@ -90,7 +90,7 @@ if app.config.get("ENV") != "production":
 
 if __name__ == "__main__":
     try:
-        app.logger.info("Starting Flask development server...")
+        app.logger.warning("Starting Flask development server...")
         app.logger.warning(
             """
             ----------------------------
@@ -103,11 +103,11 @@ if __name__ == "__main__":
         import sys
         if getattr(sys, 'frozen', False):
             # 打包环境，禁用reloader
-            app.logger.info("Running in packaged environment, disabling reloader")
+            app.logger.warning("Running in packaged environment, disabling reloader")
             app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
         else:
             # 开发环境，可以启用reloader
-            app.logger.info("Running in development environment")
+            app.logger.warning("Running in development environment")
             app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
             
     except Exception as e:
