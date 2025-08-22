@@ -27,12 +27,32 @@ def register_cli(app):
 def register_redis(app):
     from app.cli.redis.client import redis_client
     from app.cli.redis.redis_sub import RedisSub
+    import os
+    
     try:
-        redis_client.init_app(app,health_check_interval = 30)
-        redisSub = RedisSub(set(str.split(app.config.get("REDIS_SUB"),",")))
-        redisSub.start()
-    except:
-        print ("Error: 无法启动redis线程")
+        # 检查是否在打包环境中
+        if getattr(os, '_MEIPASS', None):
+            # PyInstaller打包环境，跳过Redis启动
+            app.logger.info("Running in packaged environment, skipping Redis subscription")
+            return
+            
+        redis_client.init_app(app, health_check_interval=30)
+        
+        # 获取Redis订阅配置
+        redis_sub_config = app.config.get("REDIS_SUB", "")
+        if not redis_sub_config:
+            app.logger.info("No Redis subscription configured, skipping RedisSub")
+            return
+            
+        # 启动Redis订阅线程
+        redis_sub = RedisSub(set(str.split(redis_sub_config, ",")))
+        redis_sub.start()
+        app.logger.info(f"Redis subscription started for channels: {redis_sub_config}")
+        
+    except Exception as e:
+        app.logger.warning(f"Failed to initialize Redis: {e}")
+        app.logger.info("Application will continue without Redis functionality")
+        # 不抛出异常，让应用继续运行
 
 def register_api(app):
     from app.api import api

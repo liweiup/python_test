@@ -22,20 +22,29 @@ class RedisSub(threading.Thread):
         # 标准化订阅集合，便于辅助类使用
         self.chan_sub = set(chan_sub) if isinstance(chan_sub, (set, list, tuple)) else {chan_sub}
         self.daemon = True
+        self.running = True
+
+    def stop(self):
+        """停止订阅线程"""
+        self.running = False
 
     def run(self):
             helper = RedisHelper()
             backoff_seconds = 1
-            while True:
+            max_backoff = 30  # 最大退避时间30秒
+            
+            while self.running:
                 try:
+                    # 添加连接超时
                     pubsub = helper.subscribe(self.chan_sub)
                     if pubsub is None:
+                        app.logger.warning(f"Redis subscription failed, retrying in {backoff_seconds}s...")
                         time.sleep(backoff_seconds)
-                        backoff_seconds = min(backoff_seconds * 2, 5)
+                        backoff_seconds = min(backoff_seconds * 2, max_backoff)
                         continue
 
                     # 收到消息前小睡，避免空转高CPU
-                    message = pubsub.get_message()
+                    message = pubsub.get_message(timeout=1.0)  # 1秒超时
                     if not message:
                         time.sleep(0.05)
                         continue
@@ -44,12 +53,12 @@ class RedisSub(threading.Thread):
                     if msg_type == "message":
                         channel = _to_str(message.get("channel"))
                         data = _to_str(message.get("data"))
-                        app.logger.warning(f"{channel}:{data}")
+                        app.logger.info(f"{channel}:{data}")
                         # from app.service.auto_trade import AutoTrade
                         # AutoTrade(channel)
                     elif msg_type == "subscribe":
                         channel = _to_str(message.get("channel"))
-                        app.logger.warning(f"subscribed: {channel}")
+                        app.logger.info(f"subscribed: {channel}")
 
                     # 收到有效消息后重置退避时间
                     backoff_seconds = 1
@@ -61,6 +70,11 @@ class RedisSub(threading.Thread):
                     app.logger.warning(f"redis timeout: {err}")
                     time.sleep(3)
                 except Exception as err:
-                    app.logger.warning(f"redis unknown connect error: {err}")
+                    app.logger.warning(f"redis connection error: {err}")
                     time.sleep(min(backoff_seconds, 5))
-                    backoff_seconds = min(backoff_seconds * 2, 10)
+                    backoff_seconds = min(backoff_seconds * 2, max_backoff)
+                    
+                    # 如果连续失败超过一定次数，增加更长的等待时间
+                    if backoff_seconds >= max_backoff:
+                        app.logger.error("Redis connection failed repeatedly, waiting longer...")
+                        time.sleep(10)  # 额外等待10秒
