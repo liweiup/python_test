@@ -3,11 +3,9 @@ import json
 import subprocess
 import easytrader
 import time
-import traceback 
 import win32gui
 import win32con
 import win32com.client
-import pywinauto
 from app.config import commonkey
 from app.config.trading import TradingConfig
 from app.cli.redis.client import redis_client
@@ -15,11 +13,9 @@ from app.service.easytrader_patch import _patch_easytrader
 
 class AutoTrade:
     """自动交易类 - 优化版本"""
-    
     def __init__(self, bs_type, app_instance=None, thx_path=None):
         """
         初始化自动交易
-        
         Args:
             bs_type: 交易类型 ('diff_buy', 'diff_sell', 'diff_search', 'diff_cancel')
             app_instance: Flask应用实例
@@ -27,7 +23,7 @@ class AutoTrade:
         """
         self.app = app_instance
         self.bs_type = bs_type
-        self.trynum = 1
+        self.trynum = 0
         self.max_retries = TradingConfig.MAX_RETRIES
         
         # 配置同花顺路径
@@ -36,6 +32,7 @@ class AutoTrade:
         # 设置Redis键
         self._setup_redis_keys()
         
+        self.trade_user = easytrader.use('universal_client')  # 只初始化一次
         # 初始化交易客户端
         self._init_trade_client()
         
@@ -49,40 +46,82 @@ class AutoTrade:
         elif self.bs_type == 'diff_sell':
             self.bs_key = commonkey.SELLSTOCKINFO
 
+    def _find_ths_hwnd(self):
+        """查找同花顺主窗口句柄，支持模糊匹配"""
+        target = "网上股票交易系统"
+        hwnd = None
+        def enum_handler(h, param):
+            nonlocal hwnd
+            if win32gui.IsWindowVisible(h):
+                title = win32gui.GetWindowText(h)
+                if target in title:
+                    hwnd = h
+        win32gui.EnumWindows(enum_handler, None)
+        return hwnd
     
     def _init_trade_client(self):
-        """初始化交易客户端"""
+        """初始化交易客户端（简化版）"""
         try:
-            # 检查同花顺交易客户端路径是否存在，如果不存在直接报错
             if not os.path.exists(self.thx_path):
                 self._log(f"未找到同花顺交易客户端: {self.thx_path}", level="error")
-                raise FileNotFoundError(f"同花顺交易客户端未找到: {self.thx_path}")
-            # 检查程序是否已经运行
-            is_running = False
-            try:
-                # 尝试连接，如果成功则说明程序已运行
-                self.trade_user = easytrader.use('universal_client')
-                self.trade_user.connect(self.thx_path)
-                is_running = True
-            except:
-                # 连接失败，说明程序未运行，需要启动
-                is_running = False
-             # 如果程序没有启动，那么启动一下
-            if not is_running:
-                self._log("同花顺交易客户端未运行，正在启动...")
-                program_dir = os.path.dirname(self.thx_path)
-                subprocess.Popen(
-                            [self.thx_path],
-                            cwd=program_dir,  # 设置工作目录为程序所在目录
-                            shell=True        # 通过shell启动，更接近双击行为
-                        )
-                time.sleep(5)  # 等待程序启动
+                raise FileNotFoundError(self.thx_path)
 
-            self.trade_user = easytrader.use('universal_client')
-            self.trade_user.connect(self.thx_path)
-            self.trade_user.enable_type_keys_for_editor()
-            self._set_cmd_top()
-            self._log("交易客户端初始化成功")
+            # 先尝试直接连接（如果已经运行）
+            try:
+                self.trade_user.connect(self.thx_path)
+                self._log("已连接到已运行的同花顺客户端", level="warning")
+            except Exception:
+                # 未运行或连接失败，尝试启动并等待
+                program_dir = os.path.dirname(self.thx_path)
+                try:
+                    # subprocess.Popen([self.thx_path], cwd=program_dir, shell=True)
+                    import win32api
+                    win32api.ShellExecute(None, "open", self.thx_path, None, program_dir, 1)
+                    self._log("已启动同花顺客户端，等待窗口就绪...", level="warning")
+                except Exception as e:
+                    self._log(f"启动同花顺客户端失败: {e}", level="error")
+                    raise
+
+                # 等待窗口并重试连接
+                max_wait = 30
+                waited = 0
+                connected = False
+                while waited < max_wait and not connected:
+                    time.sleep(1)
+                    waited += 1
+                    hwnd = self._find_ths_hwnd()
+                    if hwnd:
+                        try:
+                            self.trade_user.connect(self.thx_path)
+                            connected = True
+                            break
+                        except Exception as e:
+                            self._log(f"检测到窗口但连接失败（第{waited}s）: {e}", level="warning")
+                            # 把窗口置前再重试
+                            try:
+                                win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+                                win32gui.SetForegroundWindow(hwnd)
+                            except Exception:
+                                pass
+                            time.sleep(1)
+                    else:
+                        self._log(f"等待同花顺窗口出现...({waited}s)", level="warning")
+
+                if not connected:
+                    self._log("同花顺客户端窗口或连接多次失败，启动失败", level="error")
+                    raise RuntimeError("客户端连接失败")
+
+            # 连接成功后初始化
+            try:
+                self.trade_user.enable_type_keys_for_editor()
+            except Exception as e:
+                self._log(f"启用 type keys 失败: {e}", level="warning")
+            try:
+                self._set_cmd_top()
+            except Exception as e:
+                self._log(f"设置 CMD 置顶失败: {e}", level="warning")
+
+            self._log("交易客户端初始化成功", level="warning")
         except Exception as e:
             self._log(f"自动交易失败，客户端连接错误: {e}", level="error")
             raise
@@ -248,8 +287,9 @@ class AutoTrade:
         except Exception as e:
             self._log(f"查询持仓失败: {e}", level="error")
     
+
     def auto_clear(self):
-        """清仓操作：卖出所有持仓股票"""
+        """清仓操作：根据DEALTYPE决定限价或市价卖出"""
         try:
             position = self.trade_user.position
             if not position:
@@ -259,12 +299,32 @@ class AutoTrade:
                 code = pos.get('证券代码', '')
                 available = pos.get('可用余额', 0)
                 if code and float(available) > 0:
-                    self._log(f"清仓卖出 股票:{code} 可用:{available}")
-                    try:
-                        msg = self.trade_user.market_sell(code, amount=int(float(available)))
-                        self._log(f"清仓卖出结果: 股票:{code}, 数量:{available}, 结果:{msg}")
-                    except Exception as e:
-                        self._log(f"清仓卖出失败: 股票:{code}, 错误:{e}", level="error")
+                    # 直接从redis获取DEALTYPE，纯数字字符串
+                    deal_type = redis_client.hget(commonkey.DIFFBUYINFO, "DEALTYPE")
+                    if isinstance(deal_type, bytes):
+                        deal_type = deal_type.decode()
+                    if deal_type == "0":
+                        # 限价单
+                        now_price = pos.get('市价') or pos.get('当前价') or pos.get('成本价')
+                        try:
+                            price = float(now_price) - TradingConfig.SELL_PRICE_OFFSET
+                            price = '{:.2f}'.format(price)
+                        except Exception:
+                            price = now_price
+                        self._log(f"清仓限价卖出 股票:{code} 可用:{available} 价格:{price}")
+                        try:
+                            msg = self.trade_user.sell(code, price=price, amount=int(float(available)))
+                            self._log(f"清仓卖出结果: 股票:{code}, 数量:{available}, 价格:{price}, 结果:{msg}")
+                        except Exception as e:
+                            self._log(f"清仓卖出失败: 股票:{code}, 错误:{e}", level="error")
+                    else:
+                        # 市价单
+                        self._log(f"清仓市价卖出 股票:{code} 可用:{available}")
+                        try:
+                            msg = self.trade_user.market_sell(code, amount=int(float(available)))
+                            self._log(f"清仓卖出结果: 股票:{code}, 数量:{available}, 结果:{msg}")
+                        except Exception as e:
+                            self._log(f"清仓卖出失败: 股票:{code}, 错误:{e}", level="error")
         except Exception as e:
             self._log(f"清仓操作失败: {e}", level="error")
     

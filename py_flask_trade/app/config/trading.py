@@ -17,7 +17,7 @@ class TradingConfig:
     
     # 交易配置
     BUY_PRICE_OFFSET = 0.01  # 买入价格偏移
-    SELL_PRICE_OFFSET = 0.02  # 卖出价格偏移
+    SELL_PRICE_OFFSET = 0.01  # 卖出价格偏移
     MIN_TRADE_AMOUNT = 100   # 最小交易数量
     AMOUNT_ROUND_THRESHOLD = 60  # 数量取整阈值
     

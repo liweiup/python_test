@@ -10,6 +10,33 @@ from app.api.cms.model.user_group import UserGroup
 from app.api.cms.model.user_identity import UserIdentity
 from app.config.code_message import MESSAGE
 
+
+# Disable interactive stdin to avoid accidental pause/wait for Enter
+try:
+    sys.stdin.flush()
+except Exception:
+    pass
+try:
+    sys.stdin = open(os.devnull, "r")
+except Exception:
+    # best-effort, ignore if fails
+    pass
+
+if os.name == 'nt':
+    import msvcrt
+
+    def check_single_instance():
+        lock_file = os.path.join(os.environ.get('TEMP', '.'), 'flask_cms_app.lock')
+        try:
+            # 尝试创建并锁定文件
+            fp = open(lock_file, 'w')
+            msvcrt.locking(fp.fileno(), msvcrt.LK_NBLCK, 1)
+            return fp  # 返回文件句柄，程序退出前不要关闭
+        except OSError:
+            print("已有一个实例在运行，程序即将退出。")
+            sys.exit(0)
+    _single_instance_fp = check_single_instance()
+
 try:
     app = create_app(
         group_model=Group,

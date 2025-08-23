@@ -1,4 +1,5 @@
 import os
+import sys
 from itertools import groupby
 from operator import itemgetter
 
@@ -12,4 +13,8 @@ def split_group(dict_list, key):
     return result
 
 
-basedir = os.getcwd()
+if getattr(sys, 'frozen', False):
+    # PyInstaller 打包后的路径
+    basedir = os.path.dirname(sys.executable)
+else:
+    basedir = os.path.dirname(os.path.abspath(__file__))
